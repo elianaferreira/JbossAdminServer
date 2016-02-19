@@ -20,7 +20,7 @@ import tesis.server.socialNetwork.entity.PostEntity;
 
 
 /**
- * Clase que implementa las operaciones CRUD y de listado básicas
+ * Clase que implementa las operaciones CRUD y de listado bï¿½sicas
  *
  * @author eferreira
  *
@@ -29,7 +29,7 @@ import tesis.server.socialNetwork.entity.PostEntity;
  */
 public abstract class GenericDao<T, ID extends Serializable> {
 
-    @PersistenceContext(unitName="RestServerSNGlass-unit")
+    @PersistenceContext(unitName="RestServer-unit")
     protected EntityManager em;
 
     public GenericDao() {
@@ -124,7 +124,7 @@ public abstract class GenericDao<T, ID extends Serializable> {
     }
 
     /**
-     * método para actualizar un objeto de tipo T
+     * mï¿½todo para actualizar un objeto de tipo T
      * @param entity
      */
     protected void update(T entity) {
