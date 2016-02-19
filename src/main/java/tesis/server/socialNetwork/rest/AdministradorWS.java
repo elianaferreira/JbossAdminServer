@@ -1149,4 +1149,21 @@ public class AdministradorWS {
 		}
 	}
 	
+	
+	@GET
+	@Path("/pruebaAdmin")
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String pruebaReturnStirng(){
+		
+		//return "Este es un string de prueba para el admin";
+		
+		JSONObject retorno = administradorDao.iniciarSesionAdmin("admin", "admin");
+		if(retorno.has("error")){
+			return Utiles.retornarSalida(true, retorno.getString("error"));
+		} else {
+			return Utiles.retornarSalida(false, retorno.toString());
+		}
+	}
+	
 }
