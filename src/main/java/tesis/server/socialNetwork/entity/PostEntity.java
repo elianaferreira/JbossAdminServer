@@ -147,7 +147,7 @@ public class PostEntity {
 	}
 	
 	@OneToMany
-	@JoinColumn(name="LIKE")
+	@JoinColumn(name="FAV")
 	public List<FavoritoEntity> getLikeList() {
 		return likeList;
 	}
@@ -156,7 +156,7 @@ public class PostEntity {
 	}
 	
 	@OneToMany
-	@JoinColumn(name="NO_LIKE")
+	@JoinColumn(name="NO_FAV")
 	public List<NoFavoritoEntity> getNoLikeList() {
 		return noLikeList;
 	}
