@@ -29,8 +29,8 @@ import tesis.server.socialNetwork.entity.VoluntarioEntity;
  */
 public class Utiles {
 	
-	public static final String PHOTOS_FOLDER = "C://tesisPhotos/";
-	//public static final String PHOTOS_FOLDER = "WebContent\\images\\photos\\";
+	//public static final String PHOTOS_FOLDER = "C://tesisPhotos/";
+	public static final String PHOTOS_FOLDER = "OPENSHIFT_DATA_DIR";
 	//si un post pasa de esta cantidad de dias ya no puede ser relevante
 	public static final long DIAS_PASADOS_RELEVANTE = 15;
 	//variables de puntajes y reputacion
