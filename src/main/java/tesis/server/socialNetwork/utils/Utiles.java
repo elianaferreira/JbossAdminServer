@@ -1,19 +1,27 @@
 package tesis.server.socialNetwork.utils;
 
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import javax.inject.Inject;
+import javax.imageio.ImageIO;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-//import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import tesis.server.socialNetwork.dao.AdministradorDao;
 import tesis.server.socialNetwork.dao.VoluntarioDao;
@@ -29,8 +37,8 @@ import tesis.server.socialNetwork.entity.VoluntarioEntity;
  */
 public class Utiles {
 	
-	//public static final String PHOTOS_FOLDER = "C://tesisPhotos/";
-	public static final String PHOTOS_FOLDER = "OPENSHIFT_DATA_DIR";
+	public static final String PHOTOS_FOLDER = "C://tesisPhotos/";
+	//public static final String PHOTOS_FOLDER = "WebContent\\images\\photos\\";
 	//si un post pasa de esta cantidad de dias ya no puede ser relevante
 	public static final long DIAS_PASADOS_RELEVANTE = 15;
 	//variables de puntajes y reputacion
@@ -49,7 +57,7 @@ public class Utiles {
 	public static final String NOTIF_NUEVA_SOLICITUD_AMISTAD = "NUEVA_SOLICITUD_AMISTAD";
 	public static final String NOTIF_INVITADO_CAMPANHA = "INVITADO_CAMPANHA";
 	
-	public static final String MENSAJE_DE_ALERTA = "Esta es una advertencia, se ha detectado un mal uso de la aplicaci�n por parte tuya.";
+	public static final String MENSAJE_DE_ALERTA = "Esta es una advertencia, se ha detectado un mal uso de la aplicación por parte tuya.";
 	
 	public static final String REGEX_ALFANUMERIC = "^[a-zA-Z0-9]*$";
     public static final String REGEX_EMAIL = "^[_A-Za-z0-9-\\\\+]+(\\\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\\\.[A-Za-z0-9]+)*(\\\\.[A-Za-z]{2,})$";
@@ -60,10 +68,10 @@ public class Utiles {
 
 	
 	//acceso a Base de Datos
-	@Inject
+	@Autowired
 	private static VoluntarioDao voluntarioDao;
 	
-	@Inject
+	@Autowired
 	private static AdministradorDao administradorDao;
 	
 	
@@ -224,6 +232,73 @@ public class Utiles {
             throw new RuntimeException(e);
         }
     }
+	
+	
+	/**
+	 * Metodo que envia la image a Imgur y retorna el link para la descarga
+	 * 
+	 * @param image
+	 * @return
+	 * @throws Exception
+	 */
+	public static String uploadToImgur(BufferedImage image) throws Exception {
+	    //String IMGUR_POST_URI = "http://api.imgur.com/2/upload.xml";
+		String IMGUR_POST_URI = "https://api.imgur.com/3/upload.xml";	//aparentemente este es para alzar anonimamente
+		//String IMGUR_POST_URI = "https://api.imgur.com/3/image";
+	    String IMGUR_API_KEY = "c81b8b35ccf6ec5";
+
+	    String linkString =  null;
+	    
+	    try {
+	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	        System.out.println("Writing image...");
+	        ImageIO.write(image, "jpeg", baos);
+	        URL url = new URL(IMGUR_POST_URI);
+	        System.out.println("Encoding...");
+
+	        //String data = URLEncoder.encode("image", "UTF-8") + "=" + URLEncoder.encode(Base64.encodeBase64String(baos.toByteArray()).toString(), "UTF-8");
+	        String data = URLEncoder.encode("image", "UTF-8") + "=" + URLEncoder.encode(Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT), "UTF-8");
+	        data += "&" + URLEncoder.encode("key", "UTF-8") + "=" + URLEncoder.encode(IMGUR_API_KEY, "UTF-8");
+	        System.out.println("Connecting...");
+
+	        URLConnection conn = url.openConnection();
+	        conn.setDoOutput(true);
+	        conn.setRequestProperty("Authorization", "Client-ID " + IMGUR_API_KEY);
+	        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+	        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+	        System.out.println("Sending data...");
+	        /*wr.write(data);
+	        wr.flush();
+	        System.out.println("Finished.");*/
+	        wr.write(data);
+	        wr.close();
+
+	        BufferedReader in = new BufferedReader(
+	                                    new InputStreamReader(
+	                                    conn.getInputStream()));
+	        String decodedString;
+	        while ((decodedString = in.readLine()) != null) {
+	            System.out.println(decodedString);
+	            //obtenemos el link
+	            //TODO el indexOf lanza error
+	            /*
+	             * <?xml version="1.0" encoding="utf-8"?> es el primer valor de decodedString 
+	             * mejorar esta impl para que solo en el segundo valor que si tiene link tome esto
+	             */
+	            if(decodedString.indexOf("<link>") > -1){
+			        linkString = decodedString.substring(decodedString.indexOf("<link>")+6, decodedString.indexOf("</link>"));
+			        System.out.print("LINK para descarga: " + linkString);
+	            }
+	        }
+	        in.close();
+	        
+	        
+	        return linkString;
+	    } catch(Exception e){
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
 	
 	
 	

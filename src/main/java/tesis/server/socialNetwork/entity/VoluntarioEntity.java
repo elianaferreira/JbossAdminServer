@@ -45,13 +45,13 @@ public class VoluntarioEntity {
 	private List<ContactoEntity> contactos;
 	private Integer reputacion;
 	
-	private byte[] fotoDePerfil;
-	
 	private String categoria;
 	
 	private Boolean activo;
 	
 	private String msjAlerta;
+	
+	private String fotoPerfilLink;
 	
 	
 	//constructor
@@ -161,16 +161,6 @@ public class VoluntarioEntity {
 		this.reputacion = reputacion;
 	}
 
-	
-	@Column(name="FOTO_PERFIL_BYTES", nullable=true)
-	public byte[] getFotoDePerfil() {
-		return fotoDePerfil;
-	}
-
-	public void setFotoDePerfil(byte[] fotoDePerfil) {
-		this.fotoDePerfil = fotoDePerfil;
-	}
-
 	@Column(name="CATEGORIA")
 	public String getCategoria() {
 		return categoria;
@@ -196,5 +186,14 @@ public class VoluntarioEntity {
 
 	public void setMsjAlerta(String msjAlerta) {
 		this.msjAlerta = msjAlerta;
+	}
+
+	@Column(name="FOTO_PERFIL_LINK", nullable=true)
+	public String getFotoPerfilLink() {
+		return fotoPerfilLink;
+	}
+
+	public void setFotoPerfilLink(String fotoPerfilLink) {
+		this.fotoPerfilLink = fotoPerfilLink;
 	}	
 }

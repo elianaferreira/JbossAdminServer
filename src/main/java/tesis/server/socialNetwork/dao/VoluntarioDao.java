@@ -1,12 +1,8 @@
 package tesis.server.socialNetwork.dao;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.ListResourceBundle;
 
 import javax.ejb.LocalBean;
 import javax.ejb.TransactionAttribute;
@@ -17,13 +13,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.json.JSONObject;
-//import org.springframework.stereotype.Controller;
 
 import tesis.server.socialNetwork.entity.ContactoEntity;
-import tesis.server.socialNetwork.entity.PostEntity;
-import tesis.server.socialNetwork.entity.RepostEntity;
 import tesis.server.socialNetwork.entity.VoluntarioEntity;
-import tesis.server.socialNetwork.utils.SortedByDate;
 import tesis.server.socialNetwork.utils.Utiles;
 
 
@@ -53,7 +45,7 @@ public class VoluntarioDao extends GenericDao<VoluntarioEntity, String> {
 	}
 	
 	
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	public void modificar(VoluntarioEntity voluntarioEntity){
 		//el username lo ponemos a minuscula
 		voluntarioEntity.setUserName(voluntarioEntity.getUserName().toLowerCase());
@@ -148,6 +140,9 @@ public class VoluntarioDao extends GenericDao<VoluntarioEntity, String> {
 		retorno.put("reputacion", voluntarioEntity.getReputacion());
 		retorno.put("cantReportes", this.cantidadPosts(voluntarioEntity));
 		retorno.put("activo", voluntarioEntity.getActivo());
+		if(voluntarioEntity.getFotoPerfilLink() != null){
+			retorno.put("fotoPerfilLink", voluntarioEntity.getFotoPerfilLink());
+		}
 		
 		return retorno;
 	}

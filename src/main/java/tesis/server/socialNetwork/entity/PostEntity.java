@@ -3,7 +3,6 @@ package tesis.server.socialNetwork.entity;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -38,8 +37,8 @@ public class PostEntity {
 	private Double latitud;
 	private Double longitud;
 	//fotos guardadas como un array de bytes
-	private byte[] fotoAntes;
-	private byte[] fotoDespues;
+	//private byte[] fotoAntes;
+	//private byte[] fotoDespues;
 	private List<ComentarioEntity> comentarios;
 	private List<FavoritoEntity> likeList;
 	private List<NoFavoritoEntity> noLikeList;
@@ -57,6 +56,9 @@ public class PostEntity {
 	private Boolean cerradoPorAdministrador;
 	private AdminEntity administradorQueCerro;
 	private Date fechaCerrado;
+	
+	private String fotoAntesLink;
+	private String fotoDespuesLink;
 	
 	
 	//getters y setters
@@ -121,7 +123,7 @@ public class PostEntity {
 		this.longitud = longitud;
 	}
 	
-	@Column(name="FOTO_ANTES_BYTES", nullable=true)
+	/*@Column(name="FOTO_ANTES_BYTES", nullable=true)
 	public byte[] getFotoAntes() {
 		return fotoAntes;
 	}
@@ -135,7 +137,7 @@ public class PostEntity {
 	}
 	public void setFotoDespues(byte[] fotoDespues) {
 		this.fotoDespues = fotoDespues;
-	}
+	}*/
 	
 	@OneToMany
 	@JoinColumn(name="COMENTARIO")
@@ -235,5 +237,24 @@ public class PostEntity {
 	public void setFechaCerrado(Date fechaCerrado) {
 		this.fechaCerrado = fechaCerrado;
 	}
+	
+	
+	@Column(name="LINK_FOTO_ANTES", nullable=true)
+	public String getFotoAntesLink() {
+		return fotoAntesLink;
+	}
+	public void setFotoAntesLink(String fotoAntesLink) {
+		this.fotoAntesLink = fotoAntesLink;
+	}
+	
+	@Column(name="LINK_FOTO_DESPUES", nullable=true)
+	public String getFotoDespuesLink() {
+		return fotoDespuesLink;
+	}
+	public void setFotoDespuesLink(String fotoDespuesLink) {
+		this.fotoDespuesLink = fotoDespuesLink;
+	}
+	
+	
 	
 }

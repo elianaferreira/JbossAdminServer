@@ -81,9 +81,9 @@ public class SolicitudAmistadDao extends GenericDao<SolicitudAmistadEntity, Inte
 		
 		retorno.put("id", solicitudAmistadEntity.getIdSolicitudAmistad());
 		retorno.put("voluntariosolicitante", voluntarioDao.getJSONFromVoluntario(solicitudAmistadEntity.getUsuarioSolicitante()));
-		if(solicitudAmistadEntity.getUsuarioSolicitante().getFotoDePerfil() != null){
+		/*if(solicitudAmistadEntity.getUsuarioSolicitante().getFotoDePerfil() != null){
 			retorno.put("fotoPerfil", Base64.encodeToString(solicitudAmistadEntity.getUsuarioSolicitante().getFotoDePerfil(), Base64.DEFAULT));
-		}
+		}*/
 		retorno.put("aceptada", solicitudAmistadEntity.getAceptada());
 		
 		return retorno;

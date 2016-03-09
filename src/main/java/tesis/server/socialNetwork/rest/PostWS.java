@@ -5,12 +5,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.imageio.ImageIO;
@@ -23,7 +25,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -102,7 +108,7 @@ public class PostWS {
 		} else {
 			//verificamos que haya iniciado sesion
 			if(!Utiles.haIniciadoSesion(voluntarioEntity)){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//intentamos guardar en la Base de Datos
 				try {
@@ -120,7 +126,7 @@ public class PostWS {
 					if(solucionado){
 						postEntity.setVoluntarioQueSoluciona(voluntarioEntity);
 						if(fotoDespues == null){
-							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotograf�a que lo pruebe.");
+							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotografía que lo pruebe.");
 						}
 					}
 					postEntity.setQuienDebeSolucionar(quienDebeSolucionar);
@@ -151,6 +157,177 @@ public class PostWS {
 		}
 	}
 	
+	
+	@POST
+	@Path("/newReport")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String newReportMultipart(MultipartFormDataInput form){
+		PostEntity reporte = new PostEntity();
+		try{
+			Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
+			
+			List<InputPart> lista1FotoAntes = uploadForm.get("fotoantes");
+			List<InputPart> lista2FotoDespues = uploadForm.get("fotodespues");
+			
+			if(lista1FotoAntes == null){
+				return Utiles.retornarSalida(true, "Se necesita la imagen inicial del reporte.");
+			}
+			
+			
+			for (InputPart inputPart : lista1FotoAntes) {
+				try {
+					MultivaluedMap<String, String> header = inputPart.getHeaders();
+					
+					//convert the uploaded file to inputstream
+					InputStream inputStream = inputPart.getBody(InputStream.class,null);
+					
+					BufferedImage imgAntes = ImageIO.read(inputStream);
+					String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
+					if(linkFotoAntes == null){
+						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
+					} else {
+						reporte.setFotoAntesLink(linkFotoAntes);
+					}
+				} catch (IOException e) {
+					  e.printStackTrace();
+					  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+				}
+			}
+			
+			
+			/*FormDataBodyPart fotoAntesFilePart = form.getField("fotoantes");
+			FormDataBodyPart fotoDespuesFilePart = form.getField("fotodespues");
+			if(fotoAntesFilePart == null){
+				return Utiles.retornarSalida(true, "Se necesita la imagen inicial del reporte.");
+			}
+			ContentDisposition headerOfFilePart = fotoAntesFilePart.getContentDisposition();
+			InputStream fileInputStringAntes = fotoAntesFilePart.getValueAs(InputStream.class);*/
+			//FormDataBodyPart descPart = form.getField("datadesc");
+			//System.out.println(descPart.getValueAs(String.class));
+			//String dataString = descPart.getValueAs(String.class);
+			
+			String dataString = null;
+			List<InputPart> dataListPart = uploadForm.get("datadesc");
+			for (InputPart inputPart : dataListPart) {
+				try {
+					//MultivaluedMap<String, String> header = inputPart.getHeaders();
+					
+					//convert the uploaded file to inputstream
+					dataString = inputPart.getBodyAsString();
+					
+					if(dataString == null){
+						return Utiles.retornarSalida(true, "Se necesitan los datos del reporte.");
+					}
+				} catch (IOException e) {
+					  e.printStackTrace();
+					  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+				}
+			}
+			
+			
+			
+			JSONObject dataJson = new JSONObject(dataString);
+			if(!dataJson.has("username")){
+				return Utiles.retornarSalida(true, "Se necesita el nombre del voluntario.");
+			}
+			VoluntarioEntity voluntarioEntity = voluntarioDao.findByClassAndID(VoluntarioEntity.class, dataJson.getString("username").toLowerCase());
+			//verificamos que el usuario exista
+			if(voluntarioEntity == null){
+				return Utiles.retornarSalida(true, "El usuario no existe.");
+			} else {
+				//verificamos que haya iniciado sesion
+				if(!Utiles.haIniciadoSesion(voluntarioEntity)){
+					return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				} else {
+					reporte.setVoluntario(voluntarioEntity);
+					if(!dataJson.has("mensaje")){
+						return Utiles.retornarSalida(true, "Se necesita el mensaje del reporte.");
+					}
+					reporte.setPost(dataJson.getString("mensaje"));
+					
+					if(!dataJson.has("latitud") || !dataJson.has("longitud")){
+						return Utiles.retornarSalida(true, "Se necesita la geolocalización del reporte.");
+					}
+					reporte.setLatitud(dataJson.getDouble("latitud"));
+					reporte.setLongitud(dataJson.getDouble("longitud"));
+					
+					if(!dataJson.has("ranking")){
+						return Utiles.retornarSalida(true, "Se necesita el nivel de riesgo el reporte.");
+					}
+					reporte.setRankingEstado(dataJson.getInt("ranking"));
+					
+					if(dataJson.has("quienDebeSolucionar")){
+						reporte.setQuienDebeSolucionar(dataJson.getString("quienDebeSolucionar"));
+					}
+					
+					if(!dataJson.has("solucionado")){
+						return Utiles.retornarSalida(true, "Se necesita saber si el reporte está solucionado o no.");
+					}
+					reporte.setSolucionado(dataJson.getBoolean("solucionado"));
+					
+					if(dataJson.getBoolean("solucionado")){
+						if(lista2FotoDespues == null){
+							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotografía que lo pruebe.");
+						}
+					}
+					
+					//enviamos las imagenes y obtenemos las URLs de descarga del response para guardar el reporte en la BD
+					/*BufferedImage imgAntes = ImageIO.read(fileInputStringAntes);
+					String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
+					if(linkFotoAntes == null){
+						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
+					} else {
+						reporte.setFotoAntesLink(linkFotoAntes);
+					}*/
+					
+					if(reporte.getSolucionado() && lista2FotoDespues != null){
+						/*InputStream fileInputStringDespues = fotoDespuesFilePart.getValueAs(InputStream.class);
+						BufferedImage imgDespues = ImageIO.read(fileInputStringDespues);
+						String linkFotoDespues = Utiles.uploadToImgur(imgDespues);
+						if(linkFotoDespues == null){
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
+						} else {
+							reporte.setFotoDespuesLink(linkFotoDespues);
+						}*/
+						
+						for (InputPart inputPart : lista2FotoDespues) {
+							try {
+								MultivaluedMap<String, String> header = inputPart.getHeaders();
+								
+								//convert the uploaded file to inputstream
+								InputStream inputStream = inputPart.getBody(InputStream.class,null);
+								
+								BufferedImage imgDespues = ImageIO.read(inputStream);
+								String linkFotoDespues = Utiles.uploadToImgur(imgDespues);
+								if(linkFotoDespues == null){
+									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
+								} else {
+									reporte.setFotoDespuesLink(linkFotoDespues);
+								}
+							} catch (IOException e) {
+								  e.printStackTrace();
+								  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+							}
+						}
+					}
+					
+					postDao.guardar(reporte);
+					return Utiles.retornarSalida(false, "Guardada.");
+				}
+			}
+					
+			
+		} catch (IOException e) {
+	
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+		}
+	}
 	
 	/**
 	 * Para editar un post este no debe tener imagen de 'despues'
@@ -205,6 +382,77 @@ public class PostWS {
 		}
 	}
 	
+	
+	/*@Path("/updateAndResolveReport")
+	@POST
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String editReportMultipart(FormDataMultiPart form){
+		try{
+			FormDataBodyPart fotoDespuesFilePart = form.getField("fotodespues");
+			FormDataBodyPart descPart = form.getField("datadesc");
+			String dataString = descPart.getValueAs(String.class);
+			
+			JSONObject dataJSON = new JSONObject(dataString);
+			/*
+			 * id") Integer idPost,
+						   @FormParam("username") String usernameEditor,
+						   @FormParam("nuevoMensaje") String nuevoMensaje,
+						   @FormParam("fotoDespues"
+			 *
+			if(!dataJSON.has("id")){
+				return Utiles.retornarSalida(true, "El reporte no existe.");
+			} else {
+				Integer idPost = dataJSON.getInt("id");
+				PostEntity postEntity = postDao.findByClassAndID(PostEntity.class, idPost);
+				if(postEntity == null){
+					return Utiles.retornarSalida(true, "El reporte no existe.");
+				} else {
+					if(!dataJSON.has("username")){
+						return Utiles.retornarSalida(true, "No existe un voluntario con ese nombre de usuario.");
+					} else {
+						String usernameString = dataJSON.getString("username").toString();
+						VoluntarioEntity voluntarioQueResuelve = voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameString);
+						if(voluntarioQueResuelve == null){
+							return Utiles.retornarSalida(true, "No existe un voluntario con ese nombre de usuario.");
+						} else {
+							//verificamos si ha iniciado sesion
+							if(voluntarioQueResuelve.getLogged() == false){
+								return Utiles.retornarSalida(true, "No has iniciado sesión.");
+							} else {
+								postEntity.setVoluntarioQueSoluciona(voluntarioQueResuelve);
+								postEntity.setSolucionado(true);
+								if(!dataJSON.has("mensaje")){
+									return Utiles.retornarSalida(true, "Se necesita el mensaje del reporte.");
+								}
+								postEntity.setPost(dataJSON.getString("mensaje"));
+								if(fotoDespuesFilePart == null){
+									return Utiles.retornarSalida(true, "Se necesita la foto que pruebe que el reporte está solucionado");
+								}
+								ContentDisposition headerOfFilePart = fotoDespuesFilePart.getContentDisposition();
+								InputStream fileInputString = fotoDespuesFilePart.getValueAs(InputStream.class);
+								BufferedImage img = ImageIO.read(fileInputString);
+								String linkFoto = Utiles.uploadToImgur(img);
+								if(linkFoto == null){
+									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
+								} else {
+									postEntity.setFotoDespuesLink(linkFoto);
+									postDao.modificar(postEntity);
+									voluntarioDao.updateReputation(voluntarioQueResuelve, false, true, false,false, false, false, false);
+									return Utiles.retornarSalida(false, "Reporte solucionado.");
+								}
+							}
+						}
+					}
+				}
+			}			
+		} catch(Exception e){
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar el reporte.");
+		}
+	}*/
+	
 	/**
 	 * Servicio que retorna una actualizacion del timeline principal del usuario
 	 * (posts de sus amigos y de el)
@@ -230,7 +478,7 @@ public class PostWS {
 			//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//existe el usuario y ha iniciado sesion
 				Timestamp timestamp;
@@ -281,7 +529,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//buscamos el post
 				PostEntity postARepsonder = postDao.findByClassAndID(PostEntity.class, idPostToReply);
@@ -317,7 +565,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitadp = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -354,7 +602,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -422,7 +670,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -496,7 +744,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -539,7 +787,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario.");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
 				if(postSolicitado == null){
@@ -569,7 +817,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n");
+				return Utiles.retornarSalida(true, "No has iniciado sesión");
 			} else {
 				RepostEntity repost = repostDao.findByClassAndID(RepostEntity.class, idRepost);
 				if(repost == null){
@@ -600,7 +848,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario.");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				List<PostEntity> listaRelevantes = postDao.getRelevantes();
 				JSONArray retorno = new JSONArray();
@@ -658,7 +906,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario.");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				String flagTipoFoto = "";
 				if(fotoAntes != null){
@@ -705,10 +953,10 @@ public class PostWS {
 			//retornamos la foto de perfil
 			VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameProfile.toLowerCase());
 			if(voluntario != null){
-				if(voluntario.getFotoDePerfil() != null){
+				/*if(voluntario.getFotoDePerfil() != null){
 					System.out.println("FOTO DE PERFIL DE " + usernameProfile);
 					return Utiles.retornarImagen(false, Base64.encodeToString(voluntario.getFotoDePerfil(), Base64.DEFAULT));
-				}
+				}*/
 			}
 		} else if(idPost != null){
 			String antesDespues = "antes_image.png";

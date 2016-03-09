@@ -1,12 +1,25 @@
 package tesis.server.socialNetwork.rest;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -16,10 +29,32 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
+import org.hibernate.Criteria;
+import org.hibernate.annotations.Generated;
+import org.hibernate.criterion.Restrictions;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+//import com.sun.el.parser.ParseException;
+//import com.sun.jersey.core.header.ContentDisposition;
+//import com.sun.jersey.core.header.FormDataContentDisposition;
+//import com.sun.jersey.json.impl.writer.JsonEncoder;
+//import com.sun.jersey.multipart.FormDataBodyPart;
+//import com.sun.jersey.multipart.FormDataMultiPart;
+//import com.sun.jersey.multipart.FormDataParam;
+//import com.sun.xml.rpc.processor.modeler.j2ee.xml.exceptionMappingType;
+
+
+
+
 
 import tesis.server.socialNetwork.dao.CampanhaDao;
 import tesis.server.socialNetwork.dao.ContactoDao;
@@ -31,13 +66,16 @@ import tesis.server.socialNetwork.dao.VoluntarioDao;
 import tesis.server.socialNetwork.entity.CampanhaEntity;
 import tesis.server.socialNetwork.entity.ContactoEntity;
 import tesis.server.socialNetwork.entity.NotificacionEntity;
+import tesis.server.socialNetwork.entity.PostEntity;
+import tesis.server.socialNetwork.entity.RepostEntity;
 import tesis.server.socialNetwork.entity.SolicitudAmistadEntity;
 import tesis.server.socialNetwork.entity.VoluntarioEntity;
 import tesis.server.socialNetwork.utils.Base64;
+import tesis.server.socialNetwork.utils.SortedByDate;
 import tesis.server.socialNetwork.utils.Utiles;
 
 /**
- * Clase que se encargara de atender las peticiones REST para los voluntarios.
+ * Clase que se encargará de atender las peticiones REST para los voluntarios.
  * 
  * @author eliana
  *
@@ -124,7 +162,7 @@ public class VoluntarioWS {
 				
 				if(fotoPerfil != null){
 					byte[] aByteArray = Base64.decode(fotoPerfil, Base64.DEFAULT);
-					voluntario.setFotoDePerfil(aByteArray);
+					//voluntario.setFotoDePerfil(aByteArray);
 					/*BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
 
 					ImageIO.write(img, "png", new File(Utiles.PHOTOS_FOLDER + usernameLower + "_profile.png"));*/
@@ -132,11 +170,115 @@ public class VoluntarioWS {
 				//los de categoria A son agregados por el administrador
 				voluntario.setCategoria("B");
 				voluntarioDao.guardar(voluntario);
-				return Utiles.retornarSalida(false, "Voluntario registrado con �xito.");
+				return Utiles.retornarSalida(false, "Voluntario registrado con éxito.");
 			}catch(Exception ex){
 				return Utiles.retornarSalida(true, "Error al guardar los datos del voluntario.");
 			}
-		}		
+		}
+	}
+	
+	
+	@POST
+	@Path("/newAccount")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String createNewAccount(MultipartFormDataInput form){
+		
+		//FormDataBodyPart fotoPerfilPart = form.getField("fotoperfil");
+		//FormDataBodyPart datosPart = form.getField("datospersonales");
+		Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
+		
+		String dataString = null;
+		List<InputPart> dataListPart = uploadForm.get("datospersonales");
+		for (InputPart inputPart : dataListPart) {
+			try {
+				//MultivaluedMap<String, String> header = inputPart.getHeaders();
+				
+				//convert the uploaded file to inputstream
+				dataString = inputPart.getBodyAsString();
+				
+				if(dataString == null){
+					return Utiles.retornarSalida(true, "Se necesitan los datos del volunatrio.");
+				}
+			} catch (IOException e) {
+				  e.printStackTrace();
+				  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+			}
+		}
+		
+		
+		
+		try{
+			JSONObject datosJSON = new JSONObject(dataString);
+			if(!datosJSON.has("username")){
+				return Utiles.retornarSalida(true, "Se necesita un nombre de usuario.");
+			}
+			String usernameLower = datosJSON.getString("username").toLowerCase();
+			if(voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameLower) != null){
+				return Utiles.retornarSalida(true, "El usuario ya existe.");
+			} else{
+				VoluntarioEntity voluntario = new VoluntarioEntity();
+				voluntario.setUserName(usernameLower);
+				voluntario.setUsernameString(datosJSON.getString("username"));
+				//el password ya viene encriptado //la validacion se debe hacer en el cliente
+				if(!datosJSON.has("password")){
+					return Utiles.retornarSalida(true, "Se necesita una contraseña.");
+				}
+				voluntario.setPassword(datosJSON.getString("password"));
+				
+				if(!datosJSON.has("nombre")){
+					return Utiles.retornarSalida(true, "Se necesita un nombre para el usuario.");
+				}
+				voluntario.setNombreReal(datosJSON.getString("nombre"));
+				
+				if(datosJSON.has("ci")){
+					voluntario.setCi(datosJSON.getInt("ci"));
+				}
+				if(datosJSON.has("direccion")){
+					voluntario.setDireccion(datosJSON.getString("direccion"));
+				}
+				if(datosJSON.has("telefono")){
+					voluntario.setTelefono(datosJSON.getString("telefono"));
+				}
+				if(datosJSON.has("email")){
+					voluntario.setEmail(datosJSON.getString("email"));
+				}
+				
+				voluntario.setLogged(true);
+				
+				List<InputPart> fotoListPart = uploadForm.get("fotoperfil");
+				if(fotoListPart != null){
+					for (InputPart inputPart : fotoListPart) {
+						try {
+							MultivaluedMap<String, String> header = inputPart.getHeaders();
+							
+							//convert the uploaded file to inputstream
+							InputStream inputStream = inputPart.getBody(InputStream.class,null);
+							
+							BufferedImage imgAntes = ImageIO.read(inputStream);
+							String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
+							if(linkFotoAntes == null){
+								return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
+							} else {
+								voluntario.setFotoPerfilLink(linkFotoAntes);
+							}
+						} catch (IOException e) {
+							  e.printStackTrace();
+							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+						}
+					}
+				}
+				//los de categoria A son agregados por el administrador
+				voluntario.setCategoria("B");
+				voluntarioDao.guardar(voluntario);
+				return Utiles.retornarSalida(false, "Voluntario registrado con éxito.");
+			}
+			
+		} catch(Exception e){
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
+		}
 	}
 	
 	
@@ -184,7 +326,7 @@ public class VoluntarioWS {
 					if(otroVoluntario != null){
 						//verificamos si soy yo mismo
 						if(!otroVoluntario.getUserName().equals(voluntario.getUserName())){
-							return Utiles.retornarSalida(true, "Este nombre de usuario ya est� registrado.");
+							return Utiles.retornarSalida(true, "Este nombre de usuario ya está registrado.");
 						}
 						
 					}
@@ -209,7 +351,7 @@ public class VoluntarioWS {
 				}
 				if(fotoPerfil != null){
 					byte[] aByteArray = Base64.decode(fotoPerfil, Base64.DEFAULT);
-					voluntario.setFotoDePerfil(aByteArray);
+					//voluntario.setFotoDePerfil(aByteArray);
 					/*BufferedImage img;
 					try {
 						img = ImageIO.read(new ByteArrayInputStream(aByteArray));
@@ -220,16 +362,92 @@ public class VoluntarioWS {
 				}
 				try{
 					voluntarioDao.modificar(voluntario);
-					return Utiles.retornarSalida(false, "Datos actualizados con �xito");
+					return Utiles.retornarSalida(false, "Datos actualizados con éxito");
 				}catch(Exception ex){
 					return Utiles.retornarSalida(true, "Error al actualizar los datos del voluntario");
 				}
 			} else{
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n");
+				return Utiles.retornarSalida(true, "No has iniciado sesión");
 			}
-			
 		}
 	}
+	
+	
+	/*@POST
+	@Path("/updateMyAccount")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String updateMyAccount(FormDataMultiPart form){
+		FormDataBodyPart fotoPerfilPart = form.getField("fotoperfil");
+		FormDataBodyPart datosPart = form.getField("datospersonales");
+		String dataString = datosPart.getValueAs(String.class);
+		try{
+			JSONObject datosJSON = new JSONObject(dataString);
+			if(!datosJSON.has("username")){
+				return Utiles.retornarSalida(true, "Se necesita un nombre de usuario.");
+			}
+			String usernameLower = datosJSON.getString("username").toLowerCase();
+			VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameLower);
+			if(voluntario == null){
+				return Utiles.retornarSalida(true, "El usuario no existe");
+			} else {
+				//verificamos que el usuario haya iniciado sesion
+				if(Utiles.haIniciadoSesion(voluntario)){
+					//cargamos los cambios que envio el usuario
+					//verificamos que newUsername sea distinto de nulo y solo si es distinto del actual se valida
+					if(datosJSON.has("newUsername")){
+						//verificamos que no exista ya lguien con ese nombre de usuario
+						VoluntarioEntity otroVoluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, datosJSON.getString("newUsername").toLowerCase());
+						if(otroVoluntario != null){
+							//verificamos si soy yo mismo
+							if(!otroVoluntario.getUserName().equals(voluntario.getUserName())){
+								return Utiles.retornarSalida(true, "Este nombre de usuario ya está registrado.");
+							}
+							
+						}
+						//cambiamos el ID del usuario, que anteriormente se verifico que no exista ya
+						voluntario.setUserName(datosJSON.getString("newUsername").toLowerCase());
+						voluntario.setUsernameString(datosJSON.getString("newUsername"));
+					}
+					if(datosJSON.has("nombre")){
+						voluntario.setNombreReal(datosJSON.getString("nombre"));
+					}
+					if(datosJSON.has("ci")){
+						voluntario.setCi(datosJSON.getInt("ci"));
+					}
+					if(datosJSON.has("direccion")){
+						voluntario.setDireccion(datosJSON.getString("direccion"));
+					}
+					if(datosJSON.has("telefono")){
+						voluntario.setTelefono(datosJSON.getString("telefono"));
+					}
+					if(datosJSON.has("email")){
+						voluntario.setEmail(datosJSON.getString("email"));
+					}
+					if(fotoPerfilPart != null){
+						ContentDisposition headerOfFilePart = fotoPerfilPart.getContentDisposition();
+						InputStream fileInputString = fotoPerfilPart.getValueAs(InputStream.class);
+						BufferedImage img = ImageIO.read(fileInputString);
+						String linkFoto = Utiles.uploadToImgur(img);
+						voluntario.setFotoPerfilLink(linkFoto);
+					}
+					try{
+						voluntarioDao.modificar(voluntario);
+						return Utiles.retornarSalida(false, "Datos actualizados con éxito.");
+					}catch(Exception ex){
+						return Utiles.retornarSalida(true, "Error al actualizar los datos del voluntario.");
+					}
+				} else{
+					return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				}
+			}
+			
+		} catch(Exception e){
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar loa datos. Inténtalo más tarde.");
+		}
+	}*/
 	
 	
 	/**
@@ -250,7 +468,7 @@ public class VoluntarioWS {
 		//buscamos el usuario en la base de datos
 		VoluntarioEntity voluntario = voluntarioDao.verificarUsuario(username, password);
 		if(voluntario == null){
-			return Utiles.retornarSalida(true, "El usuario o la contrase�a no es v�lida.");
+			return Utiles.retornarSalida(true, "El usuario o la contraseña no es válida.");
 		} else{
 			if(voluntario.getActivo() == false){
 				return Utiles.retornarSalida(true, "El Administrador ha dado de baja tu cuenta.");
@@ -291,15 +509,15 @@ public class VoluntarioWS {
 		//traemos el usuario de la BD y cambiamos el campo logged
 		VoluntarioEntity voluntario = voluntarioDao.verificarUsuario(username, password);
 		if(voluntario == null){
-			return Utiles.retornarSalida(true, "El usuario o el password no es v�lido.");
+			return Utiles.retornarSalida(true, "El usuario o el password no es válido.");
 		}else{
 			try{
 				voluntario.setLogged(false);
 				voluntarioDao.modificar(voluntario);
-				return Utiles.retornarSalida(false, "Sesi�n cerrada.");
+				return Utiles.retornarSalida(false, "Sesión cerrada.");
 			} catch (Exception ex){
 				ex.printStackTrace();
-				return Utiles.retornarSalida(true, "Error al cerrar la sesi�n.");
+				return Utiles.retornarSalida(true, "Error al cerrar la sesión.");
 			}
 		}
 	}
@@ -327,7 +545,7 @@ public class VoluntarioWS {
 		} else {
 			//verificamos que el usuario que solicita haya iniciado sesion
 			if(!Utiles.haIniciadoSesion(voluntarioQueSolicita)){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//verificamos que el contacto exista
 				VoluntarioEntity contactoSolicitado = voluntarioDao.findByClassAndID(VoluntarioEntity.class, usuarioSolicitado.toLowerCase());
@@ -380,7 +598,7 @@ public class VoluntarioWS {
 		} else {
 			//verificamos que haya iniciado sesion
 			if(!Utiles.haIniciadoSesion(voluntarioEntity)){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n");
+				return Utiles.retornarSalida(true, "No has iniciado sesión");
 			} else{
 				List<SolicitudAmistadEntity> listaPendientes = solicitudAmistadDao.getListaSolicitudesPendientes(username.toLowerCase());				
 				if(listaPendientes.isEmpty()){
@@ -420,7 +638,7 @@ public class VoluntarioWS {
 		} else {
 			//verificamos que el usuario solicitado haya iniciado sesion
 			if(!Utiles.haIniciadoSesion(solicitud.getUsuarioSolicitado())){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//vemos si la solicitud es aceptada o rechazada
 				if(aceptar == true){
@@ -486,7 +704,7 @@ public class VoluntarioWS {
 			} else {
 				//verificamos que el usuario que solicita haya iniciado sesion
 				if(!Utiles.haIniciadoSesion(voluntarioQueSolicita)){
-					return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+					return Utiles.retornarSalida(true, "No has iniciado sesión.");
 				} else {
 					//llamamos al dao que se encarga de la busqueda
 					List<VoluntarioEntity> listaResultado = voluntarioDao.buscarUsuarios(criterioBusqueda);
@@ -561,13 +779,14 @@ public class VoluntarioWS {
 			return Utiles.retornarSalida(true, "El usuario no existe.");
 		} else {
 			//verificamos si tiene foto de perfil
-			if(voluntario.getFotoDePerfil() == null){
+			/*if(voluntario.getFotoDePerfil() == null){
 				//enviamos un array vacio
 				return Utiles.retornarSalida(true, "No tiene foto de perfil.");
 			} else {
 				return Utiles.retornarImagen(false,Base64.encodeToString(voluntario.getFotoDePerfil(), Base64.DEFAULT));
-			}
+			}*/
 		}
+		return Utiles.retornarSalida(true, "No tiene foto de perfil.");
 	}
 	
 	
@@ -633,7 +852,7 @@ public class VoluntarioWS {
 			//verificamos si ha iniciado sesion
 			if(solicitante.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username.toLowerCase());
 				if(voluntario == null){
@@ -669,12 +888,12 @@ public class VoluntarioWS {
 			//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 					JSONObject retorno = voluntarioDao.getJSONFromVoluntario(voluntario);
-					if(voluntario.getFotoDePerfil() != null){
+					/*if(voluntario.getFotoDePerfil() != null){
 						retorno.put("fotoPerfil", Base64.encodeToString(voluntario.getFotoDePerfil(), Base64.DEFAULT));
-					}
+					}*/
 					return Utiles.retornarSalida(false, retorno.toString());
 			}
 		}
@@ -697,22 +916,22 @@ public class VoluntarioWS {
 			//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				//verificamos que el password sea el mismo que el actual
 				if(!password.equals(voluntario.getPassword())){
-					return Utiles.retornarSalida(true, "La contrase�a no coincide.");
+					return Utiles.retornarSalida(true, "La contraseña no coincide.");
 				} else {
 					if(newPassword.equals(password)){
-						return Utiles.retornarSalida(true, "La nueva contrase�a es igual a la anterior.");
+						return Utiles.retornarSalida(true, "La nueva contraseña es igual a la anterior.");
 					} else {
 						try{
 							voluntario.setPassword(newPassword);
 							voluntarioDao.modificar(voluntario);
-							return Utiles.retornarSalida(false, "La contrase�a ha sido cambiado con �xito.");
+							return Utiles.retornarSalida(false, "La contraseña ha sido cambiado con éxito.");
 						} catch(Exception e){
 							e.printStackTrace();
-							return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar la contrase�a.");
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar la contraseña.");
 						}
 					}
 				}
@@ -752,7 +971,7 @@ public class VoluntarioWS {
 				}
 			} catch(Exception e){
 				e.printStackTrace();
-				return Utiles.retornarSalida(true, "Ha ocurrido un error al obtener las campa�as lanzadas.");
+				return Utiles.retornarSalida(true, "Ha ocurrido un error al obtener las campañas lanzadas.");
 			}
 		}
 	}
@@ -806,7 +1025,7 @@ public class VoluntarioWS {
 				return Utiles.retornarSalida(true, "El usuario no existe.");
 			} else {
 				if(!voluntario.getLogged()){
-					return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+					return Utiles.retornarSalida(true, "No has iniciado sesión.");
 				} else {
 					try{
 						campanha.getVoluntariosAdheridos().add(voluntario);
@@ -818,10 +1037,10 @@ public class VoluntarioWS {
 							entity.setRechazada(false);
 							notificacionDao.modificar(entity);
 						}
-						return Utiles.retornarSalida(false, "Te has adherido a la campa�a.");
+						return Utiles.retornarSalida(false, "Te has adherido a la campaña.");
 					} catch(Exception e){
 						e.printStackTrace();
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al adherirse a la campa�a.");
+						return Utiles.retornarSalida(true, "Ha ocurrido un error al adherirse a la campaña.");
 					}
 				}
 			}
@@ -872,7 +1091,7 @@ public class VoluntarioWS {
 			return Utiles.retornarSalida(true, "El usuario no existe.");
 		} else {
 			if(!voluntario.getLogged()){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				List<NotificacionEntity> lista = new ArrayList<NotificacionEntity>();
 				try{
@@ -919,7 +1138,7 @@ public class VoluntarioWS {
 			return Utiles.retornarSalida(true, "El usuario no existe.");
 		} else {
 			if(!voluntario.getLogged()){
-				return Utiles.retornarSalida(true, "No has iniciado sesi�n.");
+				return Utiles.retornarSalida(true, "No has iniciado sesión.");
 			} else {
 				JSONObject retorno = new JSONObject();
 				//reportes
@@ -1022,7 +1241,7 @@ public class VoluntarioWS {
 		} else {
 			NotificacionEntity notificacion = notificacionDao.findByClassAndID(NotificacionEntity.class, idNotificacion);
 			if(notificacion == null){
-				return Utiles.retornarSalida(true, "La notificaci�n no existe.");
+				return Utiles.retornarSalida(true, "La notificación no existe.");
 			} else {
 				//eliminamos la notificacion
 				try{
@@ -1036,10 +1255,10 @@ public class VoluntarioWS {
 					notificacion.setAceptada(false);
 					notificacion.setRechazada(true);
 					notificacionDao.modificar(notificacion);
-					return Utiles.retornarSalida(false, "Notificaci�n eliminada.");
+					return Utiles.retornarSalida(false, "Notificación eliminada.");
 				} catch(Exception e){
 					e.printStackTrace();
-					return Utiles.retornarSalida(true, "Ha ocurrido un error al elimina la notificaci�n.");
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al elimina la notificación.");
 				}
 			}
 		}
@@ -1068,7 +1287,7 @@ public class VoluntarioWS {
 		} else {
 			NotificacionEntity notificacion = notificacionDao.findByClassAndID(NotificacionEntity.class, idNotificacion);
 			if(notificacion == null){
-				return Utiles.retornarSalida(true, "La notificaci�n no existe.");
+				return Utiles.retornarSalida(true, "La notificación no existe.");
 			} else {
 				try{
 					//adherirse a la campannha
@@ -1079,7 +1298,7 @@ public class VoluntarioWS {
 						notificacion.setAceptada(true);
 						notificacion.setRechazada(false);
 						notificacionDao.modificar(notificacion);
-						return Utiles.retornarSalida(false, "Te has adherido a la campa�a.");
+						return Utiles.retornarSalida(false, "Te has adherido a la campaña.");
 					} else {
 						//se hacen amigos
 						VoluntarioEntity voluntarioSolicitante = notificacion.getVoluntarioCreadorNotificacion();
@@ -1101,12 +1320,12 @@ public class VoluntarioWS {
 				} catch(Exception e){
 					e.printStackTrace();
 					if(notificacion.getTipoNotificacion().equals(Utiles.NOTIF_INVITADO_CAMPANHA)){
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al unirte a la campa�a.");
+						return Utiles.retornarSalida(true, "Ha ocurrido un error al unirte a la campaña.");
 					} else {
 						return Utiles.retornarSalida(true, "Ha ocurrido un error al aceptar la solicitud de amistad.");
 					}
 				}
 			}
 		}
-	}
+	}	
 }

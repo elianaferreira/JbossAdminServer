@@ -13,12 +13,10 @@ import javax.inject.Inject;
 
 import org.hibernate.Query;
 import org.json.JSONObject;
-//import org.springframework.stereotype.Controller;
 
 import tesis.server.socialNetwork.entity.FavoritoEntity;
 import tesis.server.socialNetwork.entity.NoFavoritoEntity;
 import tesis.server.socialNetwork.entity.PostEntity;
-import tesis.server.socialNetwork.entity.RepostEntity;
 import tesis.server.socialNetwork.entity.VoluntarioEntity;
 import tesis.server.socialNetwork.utils.Utiles;
 
@@ -142,9 +140,9 @@ public class PostDao extends GenericDao<PostEntity, Integer> {
 			retorno.put("autorSolucion", postEntity.getVoluntarioQueSoluciona().getUsernameString());
 		}
 		retorno.put("voluntario", voluntarioDao.getJSONFromVoluntario(postEntity.getVoluntario()));
-		if(postEntity.getVoluntario().getFotoDePerfil() != null){
+		/*if(postEntity.getVoluntario().getFotoDePerfil() != null){
 			//retorno.put("fotoPerfil", Base64.encodeToString(postEntity.getVoluntario().getFotoDePerfil(), Base64.DEFAULT));
-		}
+		}*/
 		if(listaFV == null || listaFV.size() == 0){
 			retorno.put("buenos", 0);
 		} else {
@@ -165,6 +163,14 @@ public class PostDao extends GenericDao<PostEntity, Integer> {
 		}
 		
 		retorno.put("cerrado", postEntity.getCerradoPorAdministrador());
+		
+		//agregamos los links de las fotos
+		if(postEntity.getFotoAntesLink() != null){
+			retorno.put("fotoAntesLink", postEntity.getFotoAntesLink());
+		}
+		if(postEntity.getFotoDespuesLink() != null){
+			retorno.put("fotoDespuesLink", postEntity.getFotoDespuesLink());
+		}
 		
 		return retorno;
 	}
