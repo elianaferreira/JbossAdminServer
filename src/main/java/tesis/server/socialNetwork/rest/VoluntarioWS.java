@@ -199,7 +199,7 @@ public class VoluntarioWS {
 				dataString = inputPart.getBodyAsString();
 				
 				if(dataString == null){
-					return Utiles.retornarSalida(true, "Se necesitan los datos del volunatrio.");
+					return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
 				}
 			} catch (IOException e) {
 				  e.printStackTrace();
@@ -251,11 +251,14 @@ public class VoluntarioWS {
 				if(fotoListPart != null){
 					for (InputPart inputPart : fotoListPart) {
 						try {
-							MultivaluedMap<String, String> header = inputPart.getHeaders();
+							//MultivaluedMap<String, String> header = inputPart.getHeaders();
 							
 							//convert the uploaded file to inputstream
 							InputStream inputStream = inputPart.getBody(InputStream.class,null);
 							
+							if(inputStream == null){
+								return Utiles.retornarImagen(true, "La imagen de perfil parece corrupta.");
+							}
 							BufferedImage imgAntes = ImageIO.read(inputStream);
 							String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
 							if(linkFotoAntes == null){
