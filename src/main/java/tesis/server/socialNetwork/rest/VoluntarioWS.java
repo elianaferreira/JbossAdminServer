@@ -184,9 +184,7 @@ public class VoluntarioWS {
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String createNewAccount(MultipartFormDataInput form){
-		
-		//FormDataBodyPart fotoPerfilPart = form.getField("fotoperfil");
-		//FormDataBodyPart datosPart = form.getField("datospersonales");
+		/*
 		Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
 		
 		String dataString = null;
@@ -270,6 +268,70 @@ public class VoluntarioWS {
 							  e.printStackTrace();
 							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 						}
+					}
+				}
+				//los de categoria A son agregados por el administrador
+				voluntario.setCategoria("B");
+				voluntarioDao.guardar(voluntario);
+				return Utiles.retornarSalida(false, "Voluntario registrado con éxito.");
+			}
+			
+		} catch(Exception e){
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
+		}*/
+		
+		
+		try{
+			String datosPersonales = form.getFormDataPart("datospersonales", String.class, null);
+			if(datosPersonales == null || datosPersonales.isEmpty()){
+				return Utiles.retornarSalida(true, "Se necesitan los datos personales del voluntario.");
+			}
+			JSONObject datosJSON = new JSONObject(datosPersonales);
+			if(!datosJSON.has("username")){
+				return Utiles.retornarSalida(true, "Se necesita un nombre de usuario.");
+			}
+			String usernameLower = datosJSON.getString("username").toLowerCase();
+			if(voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameLower) != null){
+				return Utiles.retornarSalida(true, "El usuario ya existe.");
+			} else{
+				VoluntarioEntity voluntario = new VoluntarioEntity();
+				voluntario.setUserName(usernameLower);
+				voluntario.setUsernameString(datosJSON.getString("username"));
+				//el password ya viene encriptado //la validacion se debe hacer en el cliente
+				if(!datosJSON.has("password")){
+					return Utiles.retornarSalida(true, "Se necesita una contraseña.");
+				}
+				voluntario.setPassword(datosJSON.getString("password"));
+				
+				if(!datosJSON.has("nombre")){
+					return Utiles.retornarSalida(true, "Se necesita un nombre para el usuario.");
+				}
+				voluntario.setNombreReal(datosJSON.getString("nombre"));
+				
+				if(datosJSON.has("ci")){
+					voluntario.setCi(datosJSON.getInt("ci"));
+				}
+				if(datosJSON.has("direccion")){
+					voluntario.setDireccion(datosJSON.getString("direccion"));
+				}
+				if(datosJSON.has("telefono")){
+					voluntario.setTelefono(datosJSON.getString("telefono"));
+				}
+				if(datosJSON.has("email")){
+					voluntario.setEmail(datosJSON.getString("email"));
+				}
+				
+				voluntario.setLogged(true);
+				
+				InputStream fotoIn = form.getFormDataPart("fotoperfil", InputStream.class, null);
+				if(fotoIn != null){
+					BufferedImage img = ImageIO.read(fotoIn);
+					String linkFoto = Utiles.uploadToImgur(img);
+					if(linkFoto == null){
+						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del voluntario.");
+					} else {
+						voluntario.setFotoPerfilLink(linkFoto);
 					}
 				}
 				//los de categoria A son agregados por el administrador
