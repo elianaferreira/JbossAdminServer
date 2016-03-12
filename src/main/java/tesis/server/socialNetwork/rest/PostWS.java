@@ -28,8 +28,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+//import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+//import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -157,7 +157,7 @@ public class PostWS {
 		}
 	}
 	
-	
+	/*
 	@POST
 	@Path("/newReport")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -197,17 +197,7 @@ public class PostWS {
 			}
 			
 			
-			/*FormDataBodyPart fotoAntesFilePart = form.getField("fotoantes");
-			FormDataBodyPart fotoDespuesFilePart = form.getField("fotodespues");
-			if(fotoAntesFilePart == null){
-				return Utiles.retornarSalida(true, "Se necesita la imagen inicial del reporte.");
-			}
-			ContentDisposition headerOfFilePart = fotoAntesFilePart.getContentDisposition();
-			InputStream fileInputStringAntes = fotoAntesFilePart.getValueAs(InputStream.class);*/
-			//FormDataBodyPart descPart = form.getField("datadesc");
-			//System.out.println(descPart.getValueAs(String.class));
-			//String dataString = descPart.getValueAs(String.class);
-			
+	
 			String dataString = null;
 			List<InputPart> dataListPart = uploadForm.get("datadesc");
 			for (InputPart inputPart : dataListPart) {
@@ -273,24 +263,8 @@ public class PostWS {
 						}
 					}
 					
-					//enviamos las imagenes y obtenemos las URLs de descarga del response para guardar el reporte en la BD
-					/*BufferedImage imgAntes = ImageIO.read(fileInputStringAntes);
-					String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
-					if(linkFotoAntes == null){
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
-					} else {
-						reporte.setFotoAntesLink(linkFotoAntes);
-					}*/
 					
 					if(reporte.getSolucionado() && lista2FotoDespues != null){
-						/*InputStream fileInputStringDespues = fotoDespuesFilePart.getValueAs(InputStream.class);
-						BufferedImage imgDespues = ImageIO.read(fileInputStringDespues);
-						String linkFotoDespues = Utiles.uploadToImgur(imgDespues);
-						if(linkFotoDespues == null){
-							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
-						} else {
-							reporte.setFotoDespuesLink(linkFotoDespues);
-						}*/
 						
 						for (InputPart inputPart : lista2FotoDespues) {
 							try {
@@ -327,7 +301,7 @@ public class PostWS {
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 		}
-	}
+	}*/
 	
 	/**
 	 * Para editar un post este no debe tener imagen de 'despues'

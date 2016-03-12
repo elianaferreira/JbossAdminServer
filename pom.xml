@@ -76,12 +76,29 @@
 			<artifactId>spring-core</artifactId>
 			<version>4.2.4.RELEASE</version>
 		</dependency>
-		<dependency>
+		<!-- dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-multipart-provider</artifactId>
 			<version>3.0.16.Final</version>
 			<scope>provided</scope>
+		</dependency-->
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.19</version>
 		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-multipart</artifactId>
+			<version>1.19</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-servlet</artifactId>
+			<version>1.19</version>
+		</dependency>
+		
+		
 
 		
 		<!-- dependency>

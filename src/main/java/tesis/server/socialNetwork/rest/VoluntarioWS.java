@@ -36,8 +36,8 @@ import javax.ws.rs.core.Response;
 import org.hibernate.Criteria;
 import org.hibernate.annotations.Generated;
 import org.hibernate.criterion.Restrictions;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+//import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+//import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -55,6 +55,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 
+
+
+import com.sun.jersey.core.header.ContentDisposition;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataMultiPart;
 
 import tesis.server.socialNetwork.dao.CampanhaDao;
 import tesis.server.socialNetwork.dao.ContactoDao;
@@ -179,6 +184,73 @@ public class VoluntarioWS {
 	
 	
 	@POST
+	@Path("/newAccount")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String createNewAccount(FormDataMultiPart form){
+		
+		FormDataBodyPart fotoPerfilPart = form.getField("fotoperfil");
+		FormDataBodyPart datosPart = form.getField("datospersonales");
+		String dataString = datosPart.getValueAs(String.class);
+		try{
+			JSONObject datosJSON = new JSONObject(dataString);
+			if(!datosJSON.has("username")){
+				return Utiles.retornarSalida(true, "Se necesita un nombre de usuario.");
+			}
+			String usernameLower = datosJSON.getString("username").toLowerCase();
+			if(voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameLower) != null){
+				return Utiles.retornarSalida(true, "El usuario ya existe.");
+			} else{
+				VoluntarioEntity voluntario = new VoluntarioEntity();
+				voluntario.setUserName(usernameLower);
+				voluntario.setUsernameString(datosJSON.getString("username"));
+				//el password ya viene encriptado //la validacion se debe hacer en el cliente
+				if(!datosJSON.has("password")){
+					return Utiles.retornarSalida(true, "Se necesita una contraseña.");
+				}
+				voluntario.setPassword(datosJSON.getString("password"));
+				
+				if(!datosJSON.has("nombre")){
+					return Utiles.retornarSalida(true, "Se necesita un nombre para el usuario.");
+				}
+				voluntario.setNombreReal(datosJSON.getString("nombre"));
+				
+				if(datosJSON.has("ci")){
+					voluntario.setCi(datosJSON.getInt("ci"));
+				}
+				if(datosJSON.has("direccion")){
+					voluntario.setDireccion(datosJSON.getString("direccion"));
+				}
+				if(datosJSON.has("telefono")){
+					voluntario.setTelefono(datosJSON.getString("telefono"));
+				}
+				if(datosJSON.has("email")){
+					voluntario.setEmail(datosJSON.getString("email"));
+				}
+				
+				voluntario.setLogged(true);
+				
+				if(fotoPerfilPart != null){
+					ContentDisposition headerOfFilePart = fotoPerfilPart.getContentDisposition();
+					InputStream fileInputString = fotoPerfilPart.getValueAs(InputStream.class);
+					BufferedImage img = ImageIO.read(fileInputString);
+					String linkFoto = Utiles.uploadToImgur(img);
+					voluntario.setFotoPerfilLink(linkFoto);
+				}
+				//los de categoria A son agregados por el administrador
+				voluntario.setCategoria("B");
+				voluntarioDao.guardar(voluntario);
+				return Utiles.retornarSalida(false, "Voluntario registrado con éxito.");
+			}
+			
+		} catch(Exception e){
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
+		}
+	}
+	
+	/*@POST
 	@Path("/newAccount")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces("text/html; charset=UTF-8")
@@ -345,7 +417,7 @@ public class VoluntarioWS {
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
 		}*/
-	}
+	//}
 	
 	
 	/**
