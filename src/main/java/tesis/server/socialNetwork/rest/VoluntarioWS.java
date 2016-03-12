@@ -184,18 +184,18 @@ public class VoluntarioWS {
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String createNewAccount(MultipartFormDataInput form){
-		/*
+		
 		Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
 		
 		String dataString = null;
-		List<InputPart> dataListPart = uploadForm.get("datospersonales");
-		for (InputPart inputPart : dataListPart) {
+		
+		//for (InputPart inputPart : dataListPart) {
 			try {
 				//MultivaluedMap<String, String> header = inputPart.getHeaders();
 				
 				//convert the uploaded file to inputstream
-				dataString = inputPart.getBodyAsString();
-				
+				//dataString = inputPart.getBodyAsString();
+				dataString = uploadForm.get("datospersonales").get(0).getBodyAsString();
 				if(dataString == null){
 					return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
 				}
@@ -203,7 +203,7 @@ public class VoluntarioWS {
 				  e.printStackTrace();
 				  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 			}
-		}
+		//}
 		
 		
 		
@@ -245,14 +245,14 @@ public class VoluntarioWS {
 				
 				voluntario.setLogged(true);
 				
-				List<InputPart> fotoListPart = uploadForm.get("fotoperfil");
-				if(fotoListPart != null){
-					for (InputPart inputPart : fotoListPart) {
+				InputPart fotoPart = uploadForm.get("fotoperfil").get(0);
+				if(fotoPart != null){
+					//for (InputPart inputPart : fotoListPart) {
 						try {
 							//MultivaluedMap<String, String> header = inputPart.getHeaders();
 							
 							//convert the uploaded file to inputstream
-							InputStream inputStream = inputPart.getBody(InputStream.class,null);
+							InputStream inputStream = fotoPart.getBody(InputStream.class, null);
 							
 							if(inputStream == null){
 								return Utiles.retornarImagen(true, "La imagen de perfil parece corrupta.");
@@ -268,7 +268,7 @@ public class VoluntarioWS {
 							  e.printStackTrace();
 							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 						}
-					}
+					//}
 				}
 				//los de categoria A son agregados por el administrador
 				voluntario.setCategoria("B");
@@ -279,10 +279,11 @@ public class VoluntarioWS {
 		} catch(Exception e){
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
-		}*/
+		}
 		
 		
-		try{
+		/*try{
+			//TODO http://stackoverflow.com/a/31955172/4173916
 			String datosPersonales = form.getFormDataPart("datospersonales", String.class, null);
 			if(datosPersonales == null || datosPersonales.isEmpty()){
 				return Utiles.retornarSalida(true, "Se necesitan los datos personales del voluntario.");
@@ -343,7 +344,7 @@ public class VoluntarioWS {
 		} catch(Exception e){
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
-		}
+		}*/
 	}
 	
 	
