@@ -253,25 +253,25 @@ public class VoluntarioWS {
 				BufferedImage bufferedImage = null;
 				SequenceInputStream sequenciaDeInputStream = null;
 				List<InputPart> fotoListPart = uploadForm.get("fotoperfil");
+				byte[] byteArrayImage;
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 				if(fotoListPart != null){
 					for (InputPart inputPart : fotoListPart) {
 						try {
 							//MultivaluedMap<String, String> header = inputPart.getHeaders();
 							
+							//TODO algo aca lanza nullpointerexception
 							//convert the uploaded file to inputstream
-							InputStream in = inputPart.getBody(InputStream.class, null);
-							sequenciaDeInputStream = new SequenceInputStream(sequenciaDeInputStream, in);
+							inputStream = inputPart.getBody(InputStream.class, null);
+							InputStream is = new BufferedInputStream(inputStream);
+							bufferedImage = ImageIO.read(is); 
 							
 						} catch (IOException e) {
 							  e.printStackTrace();
 							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 						}
 					}
-					if(sequenciaDeInputStream == null){
-						return Utiles.retornarImagen(true, "La imagen de perfil parece corrupta.");
-					}
 					
-					bufferedImage = ImageIO.read(sequenciaDeInputStream);
 					String linkFotoAntes = Utiles.uploadToImgur(bufferedImage);
 					if(linkFotoAntes == null){
 						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
