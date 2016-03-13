@@ -256,11 +256,12 @@ public class VoluntarioWS {
 				byte[] byteArrayImage;
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 				if(fotoListPart != null){
+					int parte = 1;
 					for (InputPart inputPart : fotoListPart) {
+						System.out.println("parte: " + String.valueOf(parte));
 						try {
 							//MultivaluedMap<String, String> header = inputPart.getHeaders();
 							
-							//TODO algo aca lanza nullpointerexception
 							//convert the uploaded file to inputstream
 							inputStream = inputPart.getBody(InputStream.class, null);
 							InputStream is = new BufferedInputStream(inputStream);
@@ -270,6 +271,7 @@ public class VoluntarioWS {
 							  e.printStackTrace();
 							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 						}
+						parte++;
 					}
 					
 					String linkFotoAntes = Utiles.uploadToImgur(bufferedImage);
