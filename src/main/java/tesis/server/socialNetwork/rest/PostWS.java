@@ -812,7 +812,6 @@ public class PostWS {
 	
 	@GET
 	@Path("/relevantes/{username}")
-	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String postsRelevantes(@PathParam("username") String usernameSolicitante){

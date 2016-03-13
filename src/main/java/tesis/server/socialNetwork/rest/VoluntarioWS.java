@@ -185,7 +185,7 @@ public class VoluntarioWS {
 	
 	@POST
 	@Path("/newAccount")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Consumes("multipart/form-data")
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String createNewAccount(MultipartFormDataInput form){
@@ -193,22 +193,17 @@ public class VoluntarioWS {
 		Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
 		
 		String dataString = null;
-		
-		//for (InputPart inputPart : dataListPart) {
-			try {
-				//MultivaluedMap<String, String> header = inputPart.getHeaders();
-				
-				//convert the uploaded file to inputstream
-				//dataString = inputPart.getBodyAsString();
-				dataString = uploadForm.get("datospersonales").get(0).getBodyAsString();
-				if(dataString == null){
-					return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
-				}
-			} catch (IOException e) {
-				  e.printStackTrace();
-				  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+		InputPart parteDatos = uploadForm.get("datospersonales").get(0);
+		try {
+			if(parteDatos == null){
+				return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
 			}
-		//}
+			dataString = parteDatos.getBodyAsString();
+		} catch (IOException e) {
+			  e.printStackTrace();
+			  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+		}
+
 		
 		
 		
@@ -252,33 +247,25 @@ public class VoluntarioWS {
 				InputStream inputStream = null;
 				BufferedImage bufferedImage = null;
 				SequenceInputStream sequenciaDeInputStream = null;
-				List<InputPart> fotoListPart = uploadForm.get("fotoperfil");
+				InputPart fotoPart = uploadForm.get("fotoperfil").get(0);
 				byte[] byteArrayImage;
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-				if(fotoListPart != null){
-					int parte = 1;
-					for (InputPart inputPart : fotoListPart) {
-						System.out.println("parte: " + String.valueOf(parte));
-						try {
-							//MultivaluedMap<String, String> header = inputPart.getHeaders();
-							
-							//convert the uploaded file to inputstream
-							inputStream = inputPart.getBody(InputStream.class, null);
-							InputStream is = new BufferedInputStream(inputStream);
-							bufferedImage = ImageIO.read(is); 
-							
-						} catch (IOException e) {
-							  e.printStackTrace();
-							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+				if(fotoPart != null){
+					try {
+						//MultivaluedMap<String, String> header = inputPart.getHeaders();
+						
+						//convert the uploaded file to inputstream
+						inputStream = fotoPart.getBody(InputStream.class, null);
+						bufferedImage = ImageIO.read(inputStream);
+						String linkFotoAntes = Utiles.uploadToImgur(bufferedImage);
+						if(linkFotoAntes == null){
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
+						} else {
+							voluntario.setFotoPerfilLink(linkFotoAntes);
 						}
-						parte++;
-					}
-					
-					String linkFotoAntes = Utiles.uploadToImgur(bufferedImage);
-					if(linkFotoAntes == null){
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
-					} else {
-						voluntario.setFotoPerfilLink(linkFotoAntes);
+					} catch (IOException e) {
+						  e.printStackTrace();
+						  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 					}
 				}
 				//los de categoria A son agregados por el administrador
@@ -291,71 +278,6 @@ public class VoluntarioWS {
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
 		}
-		
-		
-		/*try{
-			//TODO http://stackoverflow.com/a/31955172/4173916
-			String datosPersonales = form.getFormDataPart("datospersonales", String.class, null);
-			if(datosPersonales == null || datosPersonales.isEmpty()){
-				return Utiles.retornarSalida(true, "Se necesitan los datos personales del voluntario.");
-			}
-			JSONObject datosJSON = new JSONObject(datosPersonales);
-			if(!datosJSON.has("username")){
-				return Utiles.retornarSalida(true, "Se necesita un nombre de usuario.");
-			}
-			String usernameLower = datosJSON.getString("username").toLowerCase();
-			if(voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameLower) != null){
-				return Utiles.retornarSalida(true, "El usuario ya existe.");
-			} else{
-				VoluntarioEntity voluntario = new VoluntarioEntity();
-				voluntario.setUserName(usernameLower);
-				voluntario.setUsernameString(datosJSON.getString("username"));
-				//el password ya viene encriptado //la validacion se debe hacer en el cliente
-				if(!datosJSON.has("password")){
-					return Utiles.retornarSalida(true, "Se necesita una contraseña.");
-				}
-				voluntario.setPassword(datosJSON.getString("password"));
-				
-				if(!datosJSON.has("nombre")){
-					return Utiles.retornarSalida(true, "Se necesita un nombre para el usuario.");
-				}
-				voluntario.setNombreReal(datosJSON.getString("nombre"));
-				
-				if(datosJSON.has("ci")){
-					voluntario.setCi(datosJSON.getInt("ci"));
-				}
-				if(datosJSON.has("direccion")){
-					voluntario.setDireccion(datosJSON.getString("direccion"));
-				}
-				if(datosJSON.has("telefono")){
-					voluntario.setTelefono(datosJSON.getString("telefono"));
-				}
-				if(datosJSON.has("email")){
-					voluntario.setEmail(datosJSON.getString("email"));
-				}
-				
-				voluntario.setLogged(true);
-				
-				InputStream fotoIn = form.getFormDataPart("fotoperfil", InputStream.class, null);
-				if(fotoIn != null){
-					BufferedImage img = ImageIO.read(fotoIn);
-					String linkFoto = Utiles.uploadToImgur(img);
-					if(linkFoto == null){
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del voluntario.");
-					} else {
-						voluntario.setFotoPerfilLink(linkFoto);
-					}
-				}
-				//los de categoria A son agregados por el administrador
-				voluntario.setCategoria("B");
-				voluntarioDao.guardar(voluntario);
-				return Utiles.retornarSalida(false, "Voluntario registrado con éxito.");
-			}
-			
-		} catch(Exception e){
-			e.printStackTrace();
-			return Utiles.retornarSalida(true, "Ha ocurrido un error al crear la cuenta. Inténtalo más tarde.");
-		}*/
 	}
 	
 	
@@ -450,16 +372,18 @@ public class VoluntarioWS {
 	}
 	
 	
-	/*@POST
+	@POST
 	@Path("/updateMyAccount")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Consumes("multipart/form-data")
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
-	public String updateMyAccount(FormDataMultiPart form){
-		FormDataBodyPart fotoPerfilPart = form.getField("fotoperfil");
-		FormDataBodyPart datosPart = form.getField("datospersonales");
-		String dataString = datosPart.getValueAs(String.class);
+	public String updateMyAccount(MultipartFormDataInput form){
 		try{
+			Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
+			InputPart parteDatos = uploadForm.get("datospersonales").get(0);
+			
+			String dataString = parteDatos.getBodyAsString();
+		
 			JSONObject datosJSON = new JSONObject(dataString);
 			if(!datosJSON.has("username")){
 				return Utiles.retornarSalida(true, "Se necesita un nombre de usuario.");
@@ -502,11 +426,16 @@ public class VoluntarioWS {
 					if(datosJSON.has("email")){
 						voluntario.setEmail(datosJSON.getString("email"));
 					}
-					if(fotoPerfilPart != null){
-						ContentDisposition headerOfFilePart = fotoPerfilPart.getContentDisposition();
-						InputStream fileInputString = fotoPerfilPart.getValueAs(InputStream.class);
+					
+					InputPart parteFotos = uploadForm.get("fotoperfil").get(0);
+					
+					if(parteFotos != null){
+						InputStream fileInputString = parteFotos.getBody(InputStream.class, null);
 						BufferedImage img = ImageIO.read(fileInputString);
 						String linkFoto = Utiles.uploadToImgur(img);
+						if(linkFoto == null){
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar algunos datos.");
+						}
 						voluntario.setFotoPerfilLink(linkFoto);
 					}
 					try{
@@ -519,12 +448,11 @@ public class VoluntarioWS {
 					return Utiles.retornarSalida(true, "No has iniciado sesión.");
 				}
 			}
-			
 		} catch(Exception e){
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar loa datos. Inténtalo más tarde.");
 		}
-	}*/
+	}
 	
 	
 	/**
