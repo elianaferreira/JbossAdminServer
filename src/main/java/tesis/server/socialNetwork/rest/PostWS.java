@@ -28,6 +28,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 //import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -979,7 +980,7 @@ public class PostWS {
 			InputPart parteFoto = uploadForm.get("file").get(0);
 			//ContentDisposition headerOfFilePart = filePart.getContentDisposition();
 			InputStream fileInputString = parteFoto.getBody(InputStream.class, null);
-			InputPart parteDatos = uploadForm.get("dato").get(0);
+			String parteDatos = uploadForm.get("dato").get(0).getBodyAsString();
 			System.out.println(parteDatos);
 			//FormDataBodyPart descPart = form.getField("username");
 			//System.out.println(descPart.getValueAs(String.class));
