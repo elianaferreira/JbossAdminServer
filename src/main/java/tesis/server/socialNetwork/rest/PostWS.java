@@ -28,11 +28,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 //import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 //import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+//import com.sun.jersey.core.header.ContentDisposition;
+//import com.sun.jersey.multipart.FormDataBodyPart;
+//import com.sun.jersey.multipart.FormDataMultiPart;
 
 import tesis.server.socialNetwork.dao.ComentarioDao;
 import tesis.server.socialNetwork.dao.FavoritoDao;
@@ -961,4 +967,36 @@ public class PostWS {
 		return Utiles.retornarSalida(true, "Nada que retornar.");
 	}
 
+	
+	@POST
+	@Path("/upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String uploadPhotoAndText(MultipartFormDataInput form){
+		try {
+			Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
+			InputPart parteFoto = uploadForm.get("file").get(0);
+			//ContentDisposition headerOfFilePart = filePart.getContentDisposition();
+			InputStream fileInputString = parteFoto.getBody(InputStream.class, null);
+			InputPart parteDatos = uploadForm.get("dato").get(0);
+			System.out.println(parteDatos);
+			//FormDataBodyPart descPart = form.getField("username");
+			//System.out.println(descPart.getValueAs(String.class));
+			//String dataString = descPart.getValueAs(String.class);
+			
+		
+
+			BufferedImage img = ImageIO.read(fileInputString);
+			if(img == null){
+				return Utiles.retornarSalida(true, "La imagen parece corrupta.");
+			}
+			Utiles.uploadToImgur(img);
+			
+			return Utiles.retornarSalida(false, "Guardada.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+		}
+	}
 }
