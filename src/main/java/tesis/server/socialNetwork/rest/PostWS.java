@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,27 +25,21 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-
 
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-//import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-//import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-//import com.sun.jersey.core.header.ContentDisposition;
-//import com.sun.jersey.multipart.FormDataBodyPart;
-//import com.sun.jersey.multipart.FormDataMultiPart;
-
+import tesis.server.socialNetwork.dao.PostDao;
+import tesis.server.socialNetwork.dao.VoluntarioDao;
 import tesis.server.socialNetwork.dao.ComentarioDao;
 import tesis.server.socialNetwork.dao.FavoritoDao;
 import tesis.server.socialNetwork.dao.NoFavoritoDao;
-import tesis.server.socialNetwork.dao.PostDao;
 import tesis.server.socialNetwork.dao.RepostDao;
-import tesis.server.socialNetwork.dao.VoluntarioDao;
+
 import tesis.server.socialNetwork.entity.ComentarioEntity;
 import tesis.server.socialNetwork.entity.FavoritoEntity;
 import tesis.server.socialNetwork.entity.NoFavoritoEntity;
@@ -92,7 +85,7 @@ public class PostWS {
 	 * @param longitud
 	 * @return
 	 */
-	@Path("/new")
+	/*@Path("/new")
 	@POST
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
@@ -162,9 +155,9 @@ public class PostWS {
 				}
 			}
 		}
-	}
+	}*/
 	
-	/*
+	
 	@POST
 	@Path("/newReport")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -178,52 +171,29 @@ public class PostWS {
 			List<InputPart> lista1FotoAntes = uploadForm.get("fotoantes");
 			List<InputPart> lista2FotoDespues = uploadForm.get("fotodespues");
 			
-			if(lista1FotoAntes == null){
+			if(lista1FotoAntes == null || lista1FotoAntes.size() == 0){
 				return Utiles.retornarSalida(true, "Se necesita la imagen inicial del reporte.");
 			}
+								
+			InputPart fotoAntesPart = lista1FotoAntes.get(0);
+			String fotoAntesAsString = fotoAntesPart.getBodyAsString();
+			byte[] mByteFotoAntes = Base64.decode(fotoAntesAsString, Base64.DEFAULT);
 			
-			
-			for (InputPart inputPart : lista1FotoAntes) {
-				try {
-					MultivaluedMap<String, String> header = inputPart.getHeaders();
-					
-					//convert the uploaded file to inputstream
-					InputStream inputStream = inputPart.getBody(InputStream.class,null);
-					
-					BufferedImage imgAntes = ImageIO.read(inputStream);
-					String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
-					if(linkFotoAntes == null){
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
-					} else {
-						reporte.setFotoAntesLink(linkFotoAntes);
-					}
-				} catch (IOException e) {
-					  e.printStackTrace();
-					  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
-				}
+			BufferedImage imgAntes = ImageIO.read(new ByteArrayInputStream(mByteFotoAntes));
+			String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
+			if(linkFotoAntes == null){
+				return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Inténtalo más tarde.");
+			} else {
+				reporte.setFotoAntesLink(linkFotoAntes);
 			}
 			
-			
-	
-			String dataString = null;
 			List<InputPart> dataListPart = uploadForm.get("datadesc");
-			for (InputPart inputPart : dataListPart) {
-				try {
-					//MultivaluedMap<String, String> header = inputPart.getHeaders();
-					
-					//convert the uploaded file to inputstream
-					dataString = inputPart.getBodyAsString();
-					
-					if(dataString == null){
-						return Utiles.retornarSalida(true, "Se necesitan los datos del reporte.");
-					}
-				} catch (IOException e) {
-					  e.printStackTrace();
-					  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
-				}
+			
+			if(dataListPart == null || dataListPart.size() == 0){
+				return Utiles.retornarSalida(true, "Se necesitan los datos del reporte."); 
 			}
-			
-			
+
+			String dataString = dataListPart.get(0).getBodyAsString();
 			
 			JSONObject dataJson = new JSONObject(dataString);
 			if(!dataJson.has("username")){
@@ -265,50 +235,33 @@ public class PostWS {
 					reporte.setSolucionado(dataJson.getBoolean("solucionado"));
 					
 					if(dataJson.getBoolean("solucionado")){
-						if(lista2FotoDespues == null){
+						if(lista2FotoDespues == null || lista2FotoDespues.size() == 0){
 							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotografía que lo pruebe.");
 						}
 					}
 					
-					
-					if(reporte.getSolucionado() && lista2FotoDespues != null){
+					if(reporte.getSolucionado() && lista2FotoDespues.size() > 0){
+						InputPart fotoDespuesPart = lista2FotoDespues.get(0);
+						String fotoDespuesAsString = fotoDespuesPart.getBodyAsString();
+						byte[] mByteFotoDespues = Base64.decode(fotoDespuesAsString, Base64.DEFAULT);
+						BufferedImage imgDespues = ImageIO.read(new ByteArrayInputStream(mByteFotoDespues));
 						
-						for (InputPart inputPart : lista2FotoDespues) {
-							try {
-								MultivaluedMap<String, String> header = inputPart.getHeaders();
-								
-								//convert the uploaded file to inputstream
-								InputStream inputStream = inputPart.getBody(InputStream.class,null);
-								
-								BufferedImage imgDespues = ImageIO.read(inputStream);
-								String linkFotoDespues = Utiles.uploadToImgur(imgDespues);
-								if(linkFotoDespues == null){
-									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
-								} else {
-									reporte.setFotoDespuesLink(linkFotoDespues);
-								}
-							} catch (IOException e) {
-								  e.printStackTrace();
-								  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
-							}
+						String linkFotoDespues = Utiles.uploadToImgur(imgDespues);
+						if(linkFotoDespues == null){
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Inténtalo más tarde.");
+						} else {
+							reporte.setFotoDespuesLink(linkFotoDespues);
 						}
 					}
-					
 					postDao.guardar(reporte);
 					return Utiles.retornarSalida(false, "Guardada.");
 				}
 			}
-					
-			
-		} catch (IOException e) {
-	
-			e.printStackTrace();
-			return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+			return Utiles.retornarSalida(true, "Ha ocurrido un error. Inténtalo más tarde.");
 		}
-	}*/
+	}
 	
 	/**
 	 * Para editar un post este no debe tener imagen de 'despues'
@@ -319,7 +272,7 @@ public class PostWS {
 	 * @param fotoDespues
 	 * @return
 	 */
-	@Path("/updateAndResolve")
+	/*@Path("/updateAndResolve")
 	@POST
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
@@ -361,27 +314,33 @@ public class PostWS {
 				}
 			}
 		}
-	}
+	}*/
 	
 	
-	/*@Path("/updateAndResolveReport")
+	@Path("/updateAndResolveReport")
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
-	public String editReportMultipart(FormDataMultiPart form){
+	public String editReportMultipart(MultipartFormDataInput form){
 		try{
-			FormDataBodyPart fotoDespuesFilePart = form.getField("fotodespues");
-			FormDataBodyPart descPart = form.getField("datadesc");
-			String dataString = descPart.getValueAs(String.class);
+			
+			Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
+			List<InputPart> listaDatos = uploadForm.get("datadesc");
+			List<InputPart> listaFoto = uploadForm.get("fotodespues");
+			
+			if(listaDatos == null || listaDatos.size() == 0){
+				return Utiles.retornarSalida(true, "Se necesitan los datos del reprorte.");
+			}
+			
+			if(listaFoto == null || listaFoto.size() == 0){
+				return Utiles.retornarSalida(true, "Se necesita la fotografía que pruebe la solución del reporte.");
+			}
+
+			String dataString = listaDatos.get(0).getBodyAsString();
 			
 			JSONObject dataJSON = new JSONObject(dataString);
-			/*
-			 * id") Integer idPost,
-						   @FormParam("username") String usernameEditor,
-						   @FormParam("nuevoMensaje") String nuevoMensaje,
-						   @FormParam("fotoDespues"
-			 *
+			
 			if(!dataJSON.has("id")){
 				return Utiles.retornarSalida(true, "El reporte no existe.");
 			} else {
@@ -408,15 +367,13 @@ public class PostWS {
 									return Utiles.retornarSalida(true, "Se necesita el mensaje del reporte.");
 								}
 								postEntity.setPost(dataJSON.getString("mensaje"));
-								if(fotoDespuesFilePart == null){
-									return Utiles.retornarSalida(true, "Se necesita la foto que pruebe que el reporte está solucionado");
-								}
-								ContentDisposition headerOfFilePart = fotoDespuesFilePart.getContentDisposition();
-								InputStream fileInputString = fotoDespuesFilePart.getValueAs(InputStream.class);
-								BufferedImage img = ImageIO.read(fileInputString);
+								
+								String fotoAsString = listaFoto.get(0).getBodyAsString();
+								byte[] mByteFoto = Base64.decode(fotoAsString, Base64.DEFAULT);
+								BufferedImage img = ImageIO.read(new ByteArrayInputStream(mByteFoto));
 								String linkFoto = Utiles.uploadToImgur(img);
 								if(linkFoto == null){
-									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar el reporte. Inténtalo más tarde.");
+									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Inténtalo más tarde.");
 								} else {
 									postEntity.setFotoDespuesLink(linkFoto);
 									postDao.modificar(postEntity);
@@ -427,12 +384,12 @@ public class PostWS {
 						}
 					}
 				}
-			}			
+			}
 		} catch(Exception e){
 			e.printStackTrace();
 			return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar el reporte.");
 		}
-	}*/
+	}
 	
 	/**
 	 * Servicio que retorna una actualizacion del timeline principal del usuario

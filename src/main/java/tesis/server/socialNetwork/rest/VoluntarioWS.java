@@ -1,29 +1,18 @@
 package tesis.server.socialNetwork.rest;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.SequenceInputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import javax.swing.text.html.ListView;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -32,50 +21,26 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
-import org.hibernate.Criteria;
-import org.hibernate.annotations.Generated;
-import org.hibernate.criterion.Restrictions;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-//import com.sun.el.parser.ParseException;
-//import com.sun.jersey.core.header.ContentDisposition;
-//import com.sun.jersey.core.header.FormDataContentDisposition;
-//import com.sun.jersey.json.impl.writer.JsonEncoder;
-//import com.sun.jersey.multipart.FormDataBodyPart;
-//import com.sun.jersey.multipart.FormDataMultiPart;
-//import com.sun.jersey.multipart.FormDataParam;
-//import com.sun.xml.rpc.processor.modeler.j2ee.xml.exceptionMappingType;
-
-
-
-
-
-
-import tesis.server.socialNetwork.dao.CampanhaDao;
 import tesis.server.socialNetwork.dao.ContactoDao;
-import tesis.server.socialNetwork.dao.NotificacionDao;
-import tesis.server.socialNetwork.dao.PostDao;
 import tesis.server.socialNetwork.dao.RepostDao;
 import tesis.server.socialNetwork.dao.SolicitudAmistadDao;
 import tesis.server.socialNetwork.dao.VoluntarioDao;
+import tesis.server.socialNetwork.dao.CampanhaDao;
+import tesis.server.socialNetwork.dao.NotificacionDao;
+
 import tesis.server.socialNetwork.entity.CampanhaEntity;
 import tesis.server.socialNetwork.entity.ContactoEntity;
 import tesis.server.socialNetwork.entity.NotificacionEntity;
-import tesis.server.socialNetwork.entity.PostEntity;
-import tesis.server.socialNetwork.entity.RepostEntity;
 import tesis.server.socialNetwork.entity.SolicitudAmistadEntity;
 import tesis.server.socialNetwork.entity.VoluntarioEntity;
 import tesis.server.socialNetwork.utils.Base64;
-import tesis.server.socialNetwork.utils.SortedByDate;
 import tesis.server.socialNetwork.utils.Utiles;
 
 /**
@@ -99,9 +64,6 @@ public class VoluntarioWS {
 	
 	@Inject
 	private SolicitudAmistadDao solicitudAmistadDao;
-	
-	@Inject
-	private PostDao postDao;
 
 	@Inject
 	private RepostDao repostDao;
@@ -124,7 +86,7 @@ public class VoluntarioWS {
 	 * @param email
 	 * @return
 	 */
-	@POST
+	/*@POST
 	@Path("/user/{username}")
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
@@ -167,9 +129,6 @@ public class VoluntarioWS {
 				if(fotoPerfil != null){
 					byte[] aByteArray = Base64.decode(fotoPerfil, Base64.DEFAULT);
 					//voluntario.setFotoDePerfil(aByteArray);
-					/*BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-
-					ImageIO.write(img, "png", new File(Utiles.PHOTOS_FOLDER + usernameLower + "_profile.png"));*/
 				}
 				//los de categoria A son agregados por el administrador
 				voluntario.setCategoria("B");
@@ -179,7 +138,7 @@ public class VoluntarioWS {
 				return Utiles.retornarSalida(true, "Error al guardar los datos del voluntario.");
 			}
 		}
-	}
+	}*/
 	
 	
 	
@@ -285,7 +244,7 @@ public class VoluntarioWS {
 	 * @param email
 	 * @return
 	 */
-	@POST
+	/*@POST
 	@Path("/user/update/{username}")
 	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
@@ -341,14 +300,7 @@ public class VoluntarioWS {
 				}
 				if(fotoPerfil != null){
 					byte[] aByteArray = Base64.decode(fotoPerfil, Base64.DEFAULT);
-					//voluntario.setFotoDePerfil(aByteArray);
-					/*BufferedImage img;
-					try {
-						img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-						ImageIO.write(img, "png", new File(Utiles.PHOTOS_FOLDER + usernameLower + "_profile.png"));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}*/
+					
 				}
 				try{
 					voluntarioDao.modificar(voluntario);
@@ -360,7 +312,7 @@ public class VoluntarioWS {
 				return Utiles.retornarSalida(true, "No has iniciado sesión");
 			}
 		}
-	}
+	}*/
 	
 	
 	@POST
