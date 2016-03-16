@@ -203,10 +203,7 @@ public class VoluntarioWS {
 			  e.printStackTrace();
 			  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 		}
-
-		
-		
-		
+	
 		try{
 			JSONObject datosJSON = new JSONObject(dataString);
 			if(!datosJSON.has("username")){
@@ -244,20 +241,14 @@ public class VoluntarioWS {
 				}
 				
 				voluntario.setLogged(true);
-				InputStream inputStream = null;
-				BufferedImage bufferedImage = null;
-				SequenceInputStream sequenciaDeInputStream = null;
 				InputPart fotoPart = uploadForm.get("fotoperfil").get(0);
-				byte[] byteArrayImage;
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
 				if(fotoPart != null){
 					try {
-						//MultivaluedMap<String, String> header = inputPart.getHeaders();
+						String fotoAsString = fotoPart.getBodyAsString();
+						byte[] aByteArray = Base64.decode(fotoAsString, Base64.DEFAULT);
+						BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
 						
-						//convert the uploaded file to inputstream
-						inputStream = fotoPart.getBody(InputStream.class, null);
-						bufferedImage = ImageIO.read(inputStream);
-						String linkFotoAntes = Utiles.uploadToImgur(bufferedImage);
+						String linkFotoAntes = Utiles.uploadToImgur(img);
 						if(linkFotoAntes == null){
 							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
 						} else {
@@ -430,20 +421,17 @@ public class VoluntarioWS {
 					InputPart parteFotos = uploadForm.get("fotoperfil").get(0);
 					
 					if(parteFotos != null){
-						InputStream fileInputString = parteFotos.getBody(InputStream.class, null);
-						BufferedImage img = ImageIO.read(fileInputString);
+						String fotoAsString = parteFotos.getBodyAsString();
+						byte[] aByteArray = Base64.decode(fotoAsString, Base64.DEFAULT);
+						BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
 						String linkFoto = Utiles.uploadToImgur(img);
 						if(linkFoto == null){
 							return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar algunos datos.");
 						}
 						voluntario.setFotoPerfilLink(linkFoto);
 					}
-					try{
-						voluntarioDao.modificar(voluntario);
-						return Utiles.retornarSalida(false, "Datos actualizados con éxito.");
-					}catch(Exception ex){
-						return Utiles.retornarSalida(true, "Error al actualizar los datos del voluntario.");
-					}
+					voluntarioDao.modificar(voluntario);
+					return Utiles.retornarSalida(false, "Datos actualizados con éxito.");
 				} else{
 					return Utiles.retornarSalida(true, "No has iniciado sesión.");
 				}
