@@ -977,18 +977,21 @@ public class PostWS {
 	public String uploadPhotoAndText(MultipartFormDataInput form){
 		try {
 			Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
-			InputPart parteFoto = uploadForm.get("file").get(0);
+			//InputPart parteFoto = uploadForm.get("file").get(0);
 			//ContentDisposition headerOfFilePart = filePart.getContentDisposition();
-			InputStream fileInputString = parteFoto.getBody(InputStream.class, null);
+			//InputStream fileInputString = parteFoto.getBody(InputStream.class, null);
 			String parteDatos = uploadForm.get("dato").get(0).getBodyAsString();
 			System.out.println(parteDatos);
 			//FormDataBodyPart descPart = form.getField("username");
 			//System.out.println(descPart.getValueAs(String.class));
 			//String dataString = descPart.getValueAs(String.class);
 			
-		
+			String fileAsString = uploadForm.get("file").get(0).getBodyAsString();
+			
+			byte[] aByteArray = Base64.decode(fileAsString, Base64.DEFAULT);
+			BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
 
-			BufferedImage img = ImageIO.read(fileInputString);
+			//BufferedImage img = ImageIO.read(fileInputString);
 			if(img == null){
 				return Utiles.retornarSalida(true, "La imagen parece corrupta.");
 			}
