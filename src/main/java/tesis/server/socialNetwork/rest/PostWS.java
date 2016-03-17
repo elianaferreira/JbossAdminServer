@@ -804,7 +804,6 @@ public class PostWS {
 	
 	@GET
 	@Path("/cercanos")
-	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String resportesCercanos(@QueryParam("username") String username,
@@ -830,7 +829,6 @@ public class PostWS {
 	
 	@GET
 	@Path("/photos")
-	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String getPhoto(@QueryParam("username") String usernameSolicitante,
@@ -879,7 +877,6 @@ public class PostWS {
 	
 	@GET
 	@Path("/photo")
-	@Consumes("application/x-www-form-urlencoded")
 	@Produces("text/html; charset=UTF-8")
 	@ResponseBody
 	public String getOnePhoto(@QueryParam("usernameProfile") String usernameProfile,
