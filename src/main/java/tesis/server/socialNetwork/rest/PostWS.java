@@ -74,89 +74,7 @@ public class PostWS {
 	@Inject
 	private RepostDao repostDao;
 	
-	
-	
-	/**
-	 * Metodo que recibe un nuevo reporte.
-	 * 
-	 * @param mensaje
-	 * @param username
-	 * @param latitud
-	 * @param longitud
-	 * @return
-	 */
-	/*@Path("/new")
-	@POST
-	@Consumes("application/x-www-form-urlencoded")
-	@Produces("text/html; charset=UTF-8")
-	@ResponseBody
-	public String newStatus(@FormParam("mensaje") String mensaje,
-							@FormParam("username") String username,
-							@FormParam("latitud") String latitud,
-							@FormParam("longitud") String longitud,
-							@FormParam("fotoAntes") String fotoAntes,
-							@FormParam("fotoDespues") String fotoDespues,
-							@FormParam("solucionado") Boolean solucionado,
-							@FormParam("ranking") Integer rankingEstado,
-							@FormParam("quienDebeSolucionar") String quienDebeSolucionar){
 		
-		//traemos el usuario de la Base de Datos
-		VoluntarioEntity voluntarioEntity = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username.toLowerCase());
-		//verificamos que el usuario exista
-		if(voluntarioEntity == null){
-			return Utiles.retornarSalida(true, "El usuario no existe.");
-		} else {
-			//verificamos que haya iniciado sesion
-			if(!Utiles.haIniciadoSesion(voluntarioEntity)){
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
-			} else {
-				//intentamos guardar en la Base de Datos
-				try {
-					PostEntity postEntity = new PostEntity();
-					postEntity.setPost(mensaje);
-					postEntity.setVoluntario(voluntarioEntity);
-					postEntity.setRankingEstado(rankingEstado);
-					if(latitud != null && longitud != null){
-						System.out.print("latitud: " + String.valueOf(latitud));
-						System.out.print("longitud: " + String.valueOf(longitud));
-						postEntity.setLatitud(Double.parseDouble(latitud));
-						postEntity.setLongitud(Double.parseDouble(longitud));
-					}
-					postEntity.setSolucionado(solucionado);
-					if(solucionado){
-						postEntity.setVoluntarioQueSoluciona(voluntarioEntity);
-						if(fotoDespues == null){
-							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotografía que lo pruebe.");
-						}
-					}
-					postEntity.setQuienDebeSolucionar(quienDebeSolucionar);
-					
-					Integer idGen = postDao.guardar(postEntity);
-					//una vez que se ha guardado se asocian las fotos con le ID del post en la BD
-					if(fotoAntes != null){
-						byte[] aByteArray = Base64.decode(fotoAntes, Base64.DEFAULT);
-						BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-
-						ImageIO.write(img, "png", new File(Utiles.PHOTOS_FOLDER + String.valueOf(idGen) + "antes_image.png"));
-					}
-					if(fotoDespues != null){
-						//Utiles.savePhoto(fotoDespues, "despues_" + String.valueOf(idGen));
-						byte[] aByteArray = Base64.decode(fotoDespues, Base64.DEFAULT);
-						BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-
-						ImageIO.write(img, "png", new File(Utiles.PHOTOS_FOLDER + String.valueOf(idGen) + "despues_image.png"));
-					}
-					
-					voluntarioDao.updateReputation(voluntarioEntity, true, solucionado,false, false, false, false, false);
-					return Utiles.retornarSalida(false, "Guardado.");
-				} catch(Exception ex){
-					ex.printStackTrace();
-					return Utiles.retornarSalida(true, "Error al guardar el reporte.");
-				}
-			}
-		}
-	}*/
-	
 	
 	@POST
 	@Path("/newReport")
@@ -263,58 +181,6 @@ public class PostWS {
 		}
 	}
 	
-	/**
-	 * Para editar un post este no debe tener imagen de 'despues'
-	 * 
-	 * @param idPost
-	 * @param usernameEditor
-	 * @param nuevoMensaje
-	 * @param fotoDespues
-	 * @return
-	 */
-	/*@Path("/updateAndResolve")
-	@POST
-	@Consumes("application/x-www-form-urlencoded")
-	@Produces("text/html; charset=UTF-8")
-	@ResponseBody
-	public String resolver(@FormParam("id") Integer idPost,
-						   @FormParam("username") String usernameEditor,
-						   @FormParam("nuevoMensaje") String nuevoMensaje,
-						   @FormParam("fotoDespues") String fotoDespues){
-		
-		//verificamos que el post exista en la Base de Datos
-		PostEntity postEntity = postDao.findByClassAndID(PostEntity.class, idPost);
-		if(postEntity == null){
-			return Utiles.retornarSalida(true, "El reporte no existe.");
-		} else {
-			//verificamos que el voluntario exista
-			VoluntarioEntity voluntarioEditor = voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameEditor.toLowerCase());
-			if(voluntarioEditor == null){
-				return Utiles.retornarSalida(true, "No existe el usuario.");
-			} else {
-				try{
-					if(postEntity.getCerradoPorAdministrador()){
-						return Utiles.retornarSalida(true, "Reporte cerrado por el Administrador.");
-					}
-					//actualizamos el post
-					postEntity.setPost(nuevoMensaje);
-					postEntity.setVoluntarioQueSoluciona(voluntarioEditor);
-					postEntity.setSolucionado(true);
-					postDao.modificar(postEntity);
-					//agregamos la imagen
-					byte[] aByteArray = Base64.decode(fotoDespues, Base64.DEFAULT);
-					BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-					ImageIO.write(img, "png", new File(Utiles.PHOTOS_FOLDER + String.valueOf(idPost) + "despues_image.png"));
-					
-					voluntarioDao.updateReputation(voluntarioEditor, false, true, false,false, false, false, false);
-					return Utiles.retornarSalida(false, "Reporte solucionado.");
-				} catch(Exception ex){
-					ex.printStackTrace();
-					return Utiles.retornarSalida(true, "Error al solucionar el reporte.");
-				}
-			}
-		}
-	}*/
 	
 	
 	@Path("/updateAndResolveReport")
@@ -395,10 +261,6 @@ public class PostWS {
 	 * Servicio que retorna una actualizacion del timeline principal del usuario
 	 * (posts de sus amigos y de el)
 	 * 
-	 * @param username
-	 * @param timestamp
-	 * @param rango: es la cantidad de posts que se quiere recuperar, tendra un valor por defecto en el servidor
-	 * @return
 	 */
 	@GET
 	@Path("/timeline/{username}")
@@ -429,20 +291,25 @@ public class PostWS {
 					List<PostEntity> posts = postDao.getPosts(username, timestamp, top);
 					for(int i=0; i<posts.size(); i++){
 						JSONObject postJSON = postDao.getJSONFromPost(username, posts.get(i));
-						retornoArray.add(postJSON);
+						//solo si el autor es un voluntario activo
+						if(posts.get(i).getVoluntario().getActivo()){
+							retornoArray.add(postJSON);
+						}
 					}
 					List<RepostEntity> reposts = repostDao.getReposts(username, timestamp, top);
 					List<RepostEntity> repostsFinales = repostDao.getRepostsMasDistantesDelPost(reposts);
 					for(int j=0; j<repostsFinales.size(); j++){
 						JSONObject repostJSON = repostDao.getJSONFromRepost(repostsFinales.get(j), username);
-						retornoArray.add(repostJSON);
+						//solo si el autor del repost es un voluntario activo y si el reporte en cuestion pertenece a un voluntario activo
+						if(repostsFinales.get(j).getAutorRepost().getActivo() && repostsFinales.get(j).getPost().getVoluntario().getActivo()){
+							retornoArray.add(repostJSON);
+						}
 					}
 					
 					Collections.sort(retornoArray, new SortedByDate());
 					
 					return Utiles.retornarSalida(false, retornoArray.toString());
-				}catch(Exception e){//this generic but you can control another types of exception
-					//look the origin of exception 
+				}catch(Exception e){
 					e.printStackTrace();
 				}
 				return "";

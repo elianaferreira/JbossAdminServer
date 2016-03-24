@@ -657,11 +657,10 @@ public class VoluntarioWS {
 						return Utiles.retornarSalida(true, "No hay usuario con ese nombre.");
 					} else {
 						JSONArray retorno = new JSONArray();
-						//a cada usuario le agregamos la cantidad de amigos que tiene y un boolean de si son amigos
 						for(int j=0; j<listaResultado.size(); j++){
 							VoluntarioEntity voluntario1 = listaResultado.get(j);
 							//lo agregamos a la lista solo si no se trata del mismo usuario que solicta la busqueda
-							if(voluntarioQueSolicita.getUserName().toLowerCase() != voluntario1.getUserName().toLowerCase()){
+							if(voluntarioQueSolicita.getUserName().toLowerCase() != voluntario1.getUserName().toLowerCase() && voluntario1.getActivo()){
 								//verificamos si ambos voluntarios ya son amigos, luego lo pasamos a JSON y agregamos el nuevo campo
 								JSONObject jsonFromVoluntario = voluntarioDao.getJSONFromVoluntario(listaResultado.get(j));
 								/*if(voluntarioDao.yaEsContacto(voluntarioQueSolicita, listaResultado.get(j))){
@@ -1144,7 +1143,7 @@ public class VoluntarioWS {
 					tempCantidad = listaPorReputacion.size();
 				}
 				for(int j=0; j<tempCantidad; j++){
-					if(listaPorReputacion.get(j).getUserName() != voluntario.getUserName()){
+					if(listaPorReputacion.get(j).getUserName() != voluntario.getUserName() && voluntario.getActivo()){
 						JSONObject vTemp = voluntarioDao.getJSONFromVoluntario(listaPorReputacion.get(j));
 						arrayRetorno.put(vTemp);
 					}
