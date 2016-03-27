@@ -152,7 +152,11 @@ public class VoluntarioWS {
 		Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
 		
 		String dataString = null;
-		InputPart parteDatos = uploadForm.get("datospersonales").get(0);
+		List<InputPart> listaDatosPart = uploadForm.get("datospersonales");
+		if(listaDatosPart == null ){
+			return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
+		}
+		InputPart parteDatos = listaDatosPart.get(0);
 		try {
 			if(parteDatos == null){
 				return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
@@ -200,22 +204,26 @@ public class VoluntarioWS {
 				}
 				
 				voluntario.setLogged(true);
-				InputPart fotoPart = uploadForm.get("fotoperfil").get(0);
-				if(fotoPart != null){
-					try {
-						String fotoAsString = fotoPart.getBodyAsString();
-						byte[] aByteArray = Base64.decode(fotoAsString, Base64.DEFAULT);
-						BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-						
-						String linkFotoAntes = Utiles.uploadToImgur(img);
-						if(linkFotoAntes == null){
-							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
-						} else {
-							voluntario.setFotoPerfilLink(linkFotoAntes);
+				InputPart fotoPart = null;
+				List<InputPart> listaFotoPart = uploadForm.get("fotoperfil");
+				if(listaFotoPart != null){
+						fotoPart = listaFotoPart.get(0);
+					if(fotoPart != null){
+						try {
+							String fotoAsString = fotoPart.getBodyAsString();
+							byte[] aByteArray = Base64.decode(fotoAsString, Base64.DEFAULT);
+							BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
+							
+							String linkFotoAntes = Utiles.uploadToImgur(img);
+							if(linkFotoAntes == null){
+								return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del voluntario.");
+							} else {
+								voluntario.setFotoPerfilLink(linkFotoAntes);
+							}
+						} catch (IOException e) {
+							  e.printStackTrace();
+							  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 						}
-					} catch (IOException e) {
-						  e.printStackTrace();
-						  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
 					}
 				}
 				//los de categoria A son agregados por el administrador
@@ -231,89 +239,7 @@ public class VoluntarioWS {
 	}
 	
 	
-	/**
-	 * Metodo que actualiza un usuario a la BD
-	 * 
-	 * @param username
-	 * @param password
-	 * @param nombre
-	 * @param apellido
-	 * @param ci
-	 * @param direccion
-	 * @param telefono
-	 * @param email
-	 * @return
-	 */
-	/*@POST
-	@Path("/user/update/{username}")
-	@Consumes("application/x-www-form-urlencoded")
-	@Produces("text/html; charset=UTF-8")
-	@ResponseBody
-	public String userUpdate(@PathParam("username") String username,
-							 @FormParam("newUserName") String newUserName,
-							 @FormParam("nombre") String nombre,
-							 @FormParam("apellido") String apellido,
-							 @FormParam("ci") Integer ci,
-							 @FormParam("direccion") String direccion,
-							 @FormParam("telefono") String telefono,
-							 @FormParam("email") String email,
-							 @FormParam("fotoPerfil") String fotoPerfil){
 		
-		//verificar que ese nombre de usuario exista ya en la Base de Datos
-		String usernameLower = username.toLowerCase();
-		VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, usernameLower);
-		if(voluntario == null){
-			return Utiles.retornarSalida(true, "El usuario no existe");
-		} else {
-			//verificamos que el usuario haya iniciado sesion
-			if(Utiles.haIniciadoSesion(voluntario)){
-				//cargamos los cambios que envio el usuario
-				//verificamos que newUsername sea distinto de nulo y solo si es distinto del actual se valida
-				if(newUserName != null){
-					//verificamos que no exista ya lguien con ese nombre de usuario
-					VoluntarioEntity otroVoluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, newUserName.toLowerCase());
-					if(otroVoluntario != null){
-						//verificamos si soy yo mismo
-						if(!otroVoluntario.getUserName().equals(voluntario.getUserName())){
-							return Utiles.retornarSalida(true, "Este nombre de usuario ya está registrado.");
-						}
-						
-					}
-					//cambiamos el ID del usuario, que anteriormente se verifico que no exista ya
-					voluntario.setUserName(newUserName.toLowerCase());
-					voluntario.setUsernameString(newUserName);
-				}
-				if(nombre != null){
-					voluntario.setNombreReal(nombre);
-				}
-				if(ci != null){
-					voluntario.setCi(ci);
-				}
-				if(direccion != null){
-					voluntario.setDireccion(direccion);
-				}
-				if(telefono != null){
-					voluntario.setTelefono(telefono);
-				}
-				if(email != null){
-					voluntario.setEmail(email);
-				}
-				if(fotoPerfil != null){
-					byte[] aByteArray = Base64.decode(fotoPerfil, Base64.DEFAULT);
-					
-				}
-				try{
-					voluntarioDao.modificar(voluntario);
-					return Utiles.retornarSalida(false, "Datos actualizados con éxito");
-				}catch(Exception ex){
-					return Utiles.retornarSalida(true, "Error al actualizar los datos del voluntario");
-				}
-			} else{
-				return Utiles.retornarSalida(true, "No has iniciado sesión");
-			}
-		}
-	}*/
-	
 	
 	@POST
 	@Path("/updateMyAccount")
@@ -323,9 +249,21 @@ public class VoluntarioWS {
 	public String updateMyAccount(MultipartFormDataInput form){
 		try{
 			Map<String, List<InputPart>> uploadForm = form.getFormDataMap();
-			InputPart parteDatos = uploadForm.get("datospersonales").get(0);
-			
-			String dataString = parteDatos.getBodyAsString();
+			List<InputPart> listaDatosPart = uploadForm.get("datospersonales");
+			if(listaDatosPart == null){
+				return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
+			}
+			InputPart parteDatos = listaDatosPart.get(0);
+			String dataString;
+			try {
+				if(parteDatos == null){
+					return Utiles.retornarSalida(true, "Se necesitan los datos del voluntario.");
+				}
+				dataString = parteDatos.getBodyAsString();
+			} catch (IOException e) {
+				  e.printStackTrace();
+				  return Utiles.retornarSalida(true, "Ha ocurrido un error.");
+			}
 		
 			JSONObject datosJSON = new JSONObject(dataString);
 			if(!datosJSON.has("username")){
@@ -370,17 +308,20 @@ public class VoluntarioWS {
 						voluntario.setEmail(datosJSON.getString("email"));
 					}
 					
-					InputPart parteFotos = uploadForm.get("fotoperfil").get(0);
-					
-					if(parteFotos != null){
-						String fotoAsString = parteFotos.getBodyAsString();
-						byte[] aByteArray = Base64.decode(fotoAsString, Base64.DEFAULT);
-						BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
-						String linkFoto = Utiles.uploadToImgur(img);
-						if(linkFoto == null){
-							return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar algunos datos.");
+					List<InputPart> listaPartFoto = uploadForm.get("fotoperfil");
+					if(listaPartFoto != null){
+						InputPart parteFotos = listaPartFoto.get(0);
+						
+						if(parteFotos != null){
+							String fotoAsString = parteFotos.getBodyAsString();
+							byte[] aByteArray = Base64.decode(fotoAsString, Base64.DEFAULT);
+							BufferedImage img = ImageIO.read(new ByteArrayInputStream(aByteArray));
+							String linkFoto = Utiles.uploadToImgur(img);
+							if(linkFoto == null){
+								return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar algunos datos.");
+							}
+							voluntario.setFotoPerfilLink(linkFoto);
 						}
-						voluntario.setFotoPerfilLink(linkFoto);
 					}
 					voluntarioDao.modificar(voluntario);
 					return Utiles.retornarSalida(false, "Datos actualizados con éxito.");
