@@ -100,7 +100,7 @@ public class PostWS {
 			BufferedImage imgAntes = ImageIO.read(new ByteArrayInputStream(mByteFotoAntes));
 			String linkFotoAntes = Utiles.uploadToImgur(imgAntes);
 			if(linkFotoAntes == null){
-				return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Inténtalo más tarde.");
+				return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Int\u00e9ntalo m\u00e1s tarde.");
 			} else {
 				reporte.setFotoAntesLink(linkFotoAntes);
 			}
@@ -124,7 +124,7 @@ public class PostWS {
 			} else {
 				//verificamos que haya iniciado sesion
 				if(!Utiles.haIniciadoSesion(voluntarioEntity)){
-					return Utiles.retornarSalida(true, "No has iniciado sesión.");
+					return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 				} else {
 					reporte.setVoluntario(voluntarioEntity);
 					if(!dataJson.has("mensaje")){
@@ -133,7 +133,7 @@ public class PostWS {
 					reporte.setPost(dataJson.getString("mensaje"));
 					
 					if(!dataJson.has("latitud") || !dataJson.has("longitud")){
-						return Utiles.retornarSalida(true, "Se necesita la geolocalización del reporte.");
+						return Utiles.retornarSalida(true, "Se necesita la geolocalizaci\u00f3n del reporte.");
 					}
 					reporte.setLatitud(dataJson.getDouble("latitud"));
 					reporte.setLongitud(dataJson.getDouble("longitud"));
@@ -148,13 +148,13 @@ public class PostWS {
 					}
 					
 					if(!dataJson.has("solucionado")){
-						return Utiles.retornarSalida(true, "Se necesita saber si el reporte está solucionado o no.");
+						return Utiles.retornarSalida(true, "Se necesita saber si el reporte est\u00e1 solucionado o no.");
 					}
 					reporte.setSolucionado(dataJson.getBoolean("solucionado"));
 					
 					if(dataJson.getBoolean("solucionado")){
 						if(lista2FotoDespues == null || lista2FotoDespues.size() == 0){
-							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotografía que lo pruebe.");
+							return Utiles.retornarSalida(true, "No puede ser un reporte solucionado sin fotograf\u00eda que lo pruebe.");
 						}
 					}
 					
@@ -166,7 +166,7 @@ public class PostWS {
 						
 						String linkFotoDespues = Utiles.uploadToImgur(imgDespues);
 						if(linkFotoDespues == null){
-							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Inténtalo más tarde.");
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Int\u00e9ntalo m\u00e1s tarde.");
 						} else {
 							reporte.setFotoDespuesLink(linkFotoDespues);
 						}
@@ -177,7 +177,7 @@ public class PostWS {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Utiles.retornarSalida(true, "Ha ocurrido un error. Inténtalo más tarde.");
+			return Utiles.retornarSalida(true, "Ha ocurrido un error. Int\u00e9ntalo m\u00e1s tarde.");
 		}
 	}
 	
@@ -200,7 +200,7 @@ public class PostWS {
 			}
 			
 			if(listaFoto == null || listaFoto.size() == 0){
-				return Utiles.retornarSalida(true, "Se necesita la fotografía que pruebe la solución del reporte.");
+				return Utiles.retornarSalida(true, "Se necesita la fotograf\u00eda que pruebe la soluci\u00f3n del reporte.");
 			}
 
 			String dataString = listaDatos.get(0).getBodyAsString();
@@ -225,7 +225,7 @@ public class PostWS {
 						} else {
 							//verificamos si ha iniciado sesion
 							if(voluntarioQueResuelve.getLogged() == false){
-								return Utiles.retornarSalida(true, "No has iniciado sesión.");
+								return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 							} else {
 								postEntity.setVoluntarioQueSoluciona(voluntarioQueResuelve);
 								postEntity.setSolucionado(true);
@@ -239,7 +239,7 @@ public class PostWS {
 								BufferedImage img = ImageIO.read(new ByteArrayInputStream(mByteFoto));
 								String linkFoto = Utiles.uploadToImgur(img);
 								if(linkFoto == null){
-									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Inténtalo más tarde.");
+									return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar algunos datos del reporte. Int\u00e9ntalo m\u00e1s tarde.");
 								} else {
 									postEntity.setFotoDespuesLink(linkFoto);
 									postDao.modificar(postEntity);
@@ -278,7 +278,7 @@ public class PostWS {
 			//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				//existe el usuario y ha iniciado sesion
 				Timestamp timestamp;
@@ -334,7 +334,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				//buscamos el post
 				PostEntity postARepsonder = postDao.findByClassAndID(PostEntity.class, idPostToReply);
@@ -370,7 +370,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitadp = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -407,7 +407,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -475,7 +475,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -549,7 +549,7 @@ public class PostWS {
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
 				//no ha iniciado sesion
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				//buscamos el post
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
@@ -592,7 +592,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario.");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
 				if(postSolicitado == null){
@@ -652,7 +652,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario.");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				List<PostEntity> listaRelevantes = postDao.getRelevantes();
 				JSONArray retorno = new JSONArray();
@@ -708,7 +708,7 @@ public class PostWS {
 			return Utiles.retornarSalida(true, "No existe el usuario.");
 		} else {//verificamos si ha iniciado sesion
 			if(voluntario.getLogged() == false){
-				return Utiles.retornarSalida(true, "No has iniciado sesión.");
+				return Utiles.retornarSalida(true, "No has iniciado sesi\u00f3n.");
 			} else {
 				String flagTipoFoto = "";
 				if(fotoAntes != null){
