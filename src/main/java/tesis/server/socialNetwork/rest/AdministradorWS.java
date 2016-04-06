@@ -101,7 +101,7 @@ public class AdministradorWS {
 		//verificamos si el administrador existe
 		AdminEntity administrador = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(administrador == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			//iniciamos sesion para el administrador
 			if(administradorDao.cerrarSesionAdmin(administrador)){
@@ -124,7 +124,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//array de JSON
 			JSONArray retornoNoAgregados = new JSONArray();
@@ -174,7 +174,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			//llamamos al dao que se encarga de la busqueda
 			List<VoluntarioEntity> listaResultado = voluntarioDao.buscarUsuarios(criterioBusqueda);
@@ -202,7 +202,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username);
 			if(voluntario == null){
@@ -257,7 +257,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			List<PostEntity> todosLosPosts = postDao.getAll();
 			//vamos a enviar solo el nombre real, el id del post, la ubicacion y si ya fue solucionado
@@ -295,7 +295,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			PostEntity postSolicitado = postDao.findByClassAndID(PostEntity.class, idPost);
 			if(postSolicitado == null){
@@ -318,7 +318,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			String retornoAntes = null;
 			String retornoDespues = null;
@@ -372,7 +372,7 @@ public class AdministradorWS {
 	
 	
 	@POST
-	@Path("/invalidateUser")
+	@Path("/inniguateUser")
 	@Consumes("application/x-www-form-urlencoded")
 	@ResponseBody
 	public String desactivarCuentaVoluntario(@FormParam("adminName") String adminName,
@@ -381,7 +381,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos");
 		} else {
 			//buscamos el voluntario
 			VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username);
@@ -411,7 +411,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//buscamos el voluntario
 			VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username);
@@ -445,7 +445,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONObject retorno = new JSONObject();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//traemos una lista simplificada
 			List<VoluntarioEntity> listaSimpleVoluntarios = voluntarioDao.getListAllUsers();
@@ -466,7 +466,7 @@ public class AdministradorWS {
 				
 				List<ContactoEntity> listaTotalContactos = contactoDao.listarTodosLosContactos();
 				if(listaTotalContactos.size() == 0){
-					return Utiles.retornarSalida(true, "A�n no hay ninguna relaci�n de amistad formada dentro de la red.");
+					return Utiles.retornarSalida(true, "A\u00fan no hay ninguna relaci�n de amistad formada dentro de la red.");
 				} else {
 					JSONArray arrayEdges = new JSONArray();
 					for(ContactoEntity c: listaTotalContactos){
@@ -497,7 +497,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONObject retorno = new JSONObject();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			Integer totalSolucionados = postDao.getTotalSolucionados();
 			Integer totalNoSolucionados = postDao.getTotalNoSolucionados();
@@ -517,7 +517,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			List<PostEntity> listaRelevantes = postDao.getRelevantes();
 			for(PostEntity p: listaRelevantes){
@@ -536,7 +536,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONObject retorno = new JSONObject();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//traemos la lista completa de voluntarios
 			List<VoluntarioEntity> lista = voluntarioDao.getListAllUsers();
@@ -567,7 +567,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//traemos la lista completa de voluntarios
 			List<VoluntarioEntity> lista = voluntarioDao.getListUsersByRanking();
@@ -593,22 +593,22 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//buscamos la `nha por el nombre
 			if(nombreCampanha.trim().equals("")){
-				return Utiles.retornarSalida(true, "La campanha debe contar con un nombre.");
+				return Utiles.retornarSalida(true, "La campa\u00f1a debe contar con un nombre.");
 			} else {
 				if(campanhaDao.buscarPorNombre(nombreCampanha) != null){
-					return Utiles.retornarSalida(true, "Ya existe una campanha con ese nombre.");
+					return Utiles.retornarSalida(true, "Ya existe una campa\u00f1a con ese nombre.");
 				} else {
 					CampanhaEntity campanha = new CampanhaEntity();
 					//verificamos la fecha de lanzamiento
 					if(fechaLanzamiento.trim().equals("")){
-						return Utiles.retornarSalida(true, "La campanha debe contar con fecha de inicio.");
+						return Utiles.retornarSalida(true, "La campa\u00f1a debe contar con fecha de inicio.");
 					} else {
 						if(fechaFinalizacion.trim().equals("")){
-							return Utiles.retornarSalida(true, "La campanha debe contar con una fecha de finalizaci�n.");
+							return Utiles.retornarSalida(true, "La campa\u00f1a debe contar con una fecha de finalizaci\u00f3n.");
 						}
 						campanha.setNombreCampanha(nombreCampanha);
 						if(!mensajeCampanha.trim().equals("")){
@@ -630,7 +630,7 @@ public class AdministradorWS {
 							
 							JSONArray arrayInvitados = new JSONArray(voluntariosInvitados);
 							if(arrayInvitados.length() == 0){
-								return Utiles.retornarSalida(true, "La campanha debe contar con al menos un voluntario como invitado.");
+								return Utiles.retornarSalida(true, "La campa\u00f1a debe contar con al menos un voluntario como invitado.");
 							}
 							JSONArray retornoNoInvitados = new JSONArray();
 							for(int i=0; i<arrayInvitados.length(); i++){
@@ -645,7 +645,7 @@ public class AdministradorWS {
 							}
 							//si la cantidad de retornoNoInvitados es igual al lenght de invitados, ningun voluntario era valido
 							if(retornoNoInvitados.length() == arrayInvitados.length()){
-								return Utiles.retornarSalida(true, "Ning�n voluntario ten�a un nombre de usuario v�lido, por favor, verif�quelo y vuelta a intentarlo");
+								return Utiles.retornarSalida(true, "Ning\u00fan voluntario ten\u00eda un nombre de usuario v\u00e1lido, por favor, verif\u00edquelo y vuelta a intentarlo");
 							}
 							
 							//intentamos guardar la campanha
@@ -656,11 +656,11 @@ public class AdministradorWS {
 								return Utiles.retornarSalida(false, retornoNoInvitados.toString());
 							} catch(Exception ex){
 								ex.printStackTrace();
-								return Utiles.retornarSalida(true, "Hubo un error al intentar guardar la campanha, por favor, intentalo de nuevo m�s tarde.");
+								return Utiles.retornarSalida(true, "Hubo un error al intentar guardar la campa\u00f1a, por favor, intentalo de nuevo m\u00e1s tarde.");
 							}
 						} catch (ParseException e) {
 							e.printStackTrace();
-							return Utiles.retornarSalida(true, "La fecha no tiene un formato v�lido.");
+							return Utiles.retornarSalida(true, "La fecha no tiene un formato v\u00e1lido.");
 						}
 					}
 				}
@@ -675,7 +675,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			List<VoluntarioEntity> lista = voluntarioDao.getListCategoryA();
 			for(VoluntarioEntity v: lista){
@@ -693,7 +693,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//traemos la lista completa de voluntarios
 			List<VoluntarioEntity> lista = voluntarioDao.getListCategoryB();
@@ -711,7 +711,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//traemos la lista completa de voluntarios
 			List<VoluntarioEntity> lista = voluntarioDao.getListAllUsers();
@@ -735,7 +735,7 @@ public class AdministradorWS {
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son inv�lidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//puede ser el mensaje del Administrador o uno por default
 			String mensajeAMostrar;
@@ -749,9 +749,9 @@ public class AdministradorWS {
 				}
 			}
 			if(username.trim().equals("")){
-				Utiles.retornarSalida(true, "El nombre de usuario debe ser v�lido.");
+				Utiles.retornarSalida(true, "El nombre de usuario debe ser v\u00e1lido.");
 			} else if(!username.matches(Utiles.REGEX_ALFANUMERIC)){
-				Utiles.retornarSalida(true, "El nombre de usuario debe ser v�lido.");
+				Utiles.retornarSalida(true, "El nombre de usuario debe ser v\u00e1lido.");
 			} else {
 				VoluntarioEntity voluntarioEntity = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username);
 				if(voluntarioEntity == null){
@@ -782,7 +782,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			Timestamp timestamp;
 			try{
@@ -822,7 +822,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			try{
 				List<PostEntity> listaNoSolucionados = postDao.listaQuienDebeSolucionar();
@@ -871,7 +871,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 			
 		} else {
 			try{
@@ -884,7 +884,7 @@ public class AdministradorWS {
 				return Utiles.retornarSalida(false, retorno.toString());
 			} catch(Exception e){
 				e.printStackTrace();
-				return Utiles.retornarSalida(true, "Ha ocurrido un error al obtener las campa�as lanzadas.");
+				return Utiles.retornarSalida(true, "Ha ocurrido un error al obtener las campa\u00f1as lanzadas.");
 			}
 		}
 	}
@@ -900,7 +900,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			try{
 				Timestamp timestamp;
@@ -932,7 +932,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			//obtenemos el reporte
 			PostEntity post = postDao.findByClassAndID(PostEntity.class, reporteId);
@@ -971,7 +971,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			try{
 				//SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -1003,11 +1003,11 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			CampanhaEntity campanha = campanhaDao.findByClassAndID(CampanhaEntity.class, idCampanha);
 			if(campanha == null){
-				return Utiles.retornarSalida(true, "La campanha no existe.");
+				return Utiles.retornarSalida(true, "La campa\u00f1a no existe.");
 			} else {
 				List<VoluntarioEntity> adheridos = campanha.getVoluntariosAdheridos();
 				JSONArray retorno = new JSONArray();
@@ -1030,11 +1030,11 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			CampanhaEntity campanha = campanhaDao.findByClassAndID(CampanhaEntity.class, idCampanha);
 			if(campanha == null){
-				return Utiles.retornarSalida(true, "La campanha no existe.");
+				return Utiles.retornarSalida(true, "La campa\u00f1a no existe.");
 			} else {
 				List<VoluntarioEntity> invitados = campanha.getVoluntariosInvitados();
 				JSONArray retorno = new JSONArray();
@@ -1060,7 +1060,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			Timestamp timestamp;
 			try{
@@ -1093,7 +1093,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			Timestamp timestamp;
 			try{
@@ -1126,7 +1126,7 @@ public class AdministradorWS {
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		if(admin == null){
-			return Utiles.retornarSalida(true, "El nombre o la contrasenha son invalidos.");
+			return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
 		} else {
 			Timestamp timestamp;
 			try{
@@ -1150,20 +1150,151 @@ public class AdministradorWS {
 	}
 	
 	
-	@GET
-	@Path("/pruebaAdmin")
-	@Produces("text/html; charset=UTF-8")
-	@ResponseBody
-	public String pruebaReturnStirng(){
-		
-		//return "Este es un string de prueba para el admin";
-		
-		JSONObject retorno = administradorDao.iniciarSesionAdmin("admin", "admin");
-		if(retorno.has("error")){
-			return Utiles.retornarSalida(true, retorno.getString("error"));
-		} else {
-			return Utiles.retornarSalida(false, retorno.toString());
+	//creamos un metodo auxiliar que permitira crear un administrador para el inicio
+		@POST
+		@Path("/createFirstAdmin")
+		@Produces("text/html; charset=UTF-8")
+		@ResponseBody
+		public String createFirstAdmin(){
+			try{
+			AdminEntity primerAdmin = new AdminEntity();
+			primerAdmin.setAdminName("administrador");
+			primerAdmin.setNombre("Eliana");
+			primerAdmin.setApellido("Ferreira");
+			primerAdmin.setPassword(Utiles.getMD5("administrador"));
+			primerAdmin.setCi(4278950);
+			primerAdmin.setDireccion("Luque");
+			primerAdmin.setEmail("elianaef817@gmail.com");
+			primerAdmin.setTelefono("0971877088");
+			
+			administradorDao.guardar(primerAdmin);
+			return Utiles.retornarSalida(false, "Administrador agregado.");
+			}catch(Exception e){
+				e.printStackTrace();
+				return Utiles.retornarSalida(true, "Ha ocurrido un error al agregar el administrador.");
+			}
 		}
-	}
+		
+		
+		
+		@POST
+		@Path("/newFirstAdmin")
+		@Produces("text/html; charset=UTF-8")
+		@ResponseBody
+		public String addAdminAccount(@FormParam("adminName") String adminNane,
+										@FormParam("password") String password,
+										@FormParam("nombre") String nombre,
+										@FormParam("apellido") String apellido,
+										@FormParam("ci") Integer ci,
+										@FormParam("direccion") String direccion,
+										@FormParam("email") String email,
+										@FormParam("telefono") String telefono){
+			
+			//verificar campos obligatorios
+			if(adminNane.trim().equals("")){
+				return Utiles.retornarSalida(true, "El nombre de usuario del Administrador no puede estar vac\u00edo.");
+			} else {
+				Boolean yaExiste = administradorDao.yaExisteAdministrador(adminNane);
+				if(yaExiste){
+					return Utiles.retornarSalida(true, "Ya existe un Administrador con ese nombre.");
+				} else {
+					if(password.trim().equals("")){
+						return Utiles.retornarSalida(true, "La contrase\u00f1a no puede ser vac\u00eda.");
+					} else if(nombre.trim().equals("") || apellido.trim().equals("")){
+						return Utiles.retornarSalida(true, "El Administrador debe contar con nombre y apellido.");
+					} else {
+						//los demas ya no son obligatorios
+						try{
+							AdminEntity administrador = new AdminEntity();
+							administrador.setAdminName(adminNane);
+							administrador.setNombre(nombre);
+							administrador.setPassword(password);
+							administrador.setApellido(apellido);
+							administrador.setCi(ci);
+							administrador.setDireccion(direccion);
+							administrador.setTelefono(telefono);
+							administrador.setEmail(email);
+							administradorDao.guardar(administrador);
+							return Utiles.retornarSalida(false, "Datos del Administrador guardados correctamente.");
+						} catch(Exception e){
+							e.printStackTrace();
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del Administrador.");
+						}
+					}
+				}
+			}
+		}
+		
+		
+		@GET
+		@Path("/getInfo")
+		@Produces("text/html; charset=UTF-8")
+		@ResponseBody
+		public String getAdminInfo(@QueryParam("admin") String adminName,
+									@QueryParam("accessToken") String accessToken){
+			AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
+			if(admin == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			} else {
+				try {
+					JSONObject retorno = administradorDao.getAllDataForEdit(admin);
+					return Utiles.retornarSalida(false, retorno.toString());
+					
+				} catch(Exception e){
+					e.printStackTrace();
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al obtener los datos del Administrador.");
+				}
+			}
+		}
+		
+		
+		@POST
+		@Path("/newAdmin")
+		@Produces("text/html; charset=UTF-8")
+		@ResponseBody
+		public String addNewAdmin(@FormParam("admin") String admin,
+								  @FormParam("name") String name,
+								  @FormParam("lastname") String lastname,
+								  @FormParam("password") String password,
+								  @FormParam("passConfirm") String passConfirm,
+								  @FormParam("email") String email,
+								  @FormParam("ci") Integer ci,
+								  @FormParam("phone") String phone,
+								  @FormParam("address") String address){
+			
+			if(admin.equals("")){
+				return Utiles.retornarSalida(true, "El Administrador debe tener un nombre de identificaci\u00f3n.");
+			} else {
+				if(administradorDao.yaExisteAdministrador(admin)){
+					return Utiles.retornarSalida(true, "Ya existe un Administrador con ese nombre de usuario.");
+				} else {
+					if(name.equals("") || lastname.equals("")){
+						return Utiles.retornarSalida(true, "El Administrador debe contar con nombre y apellido.");
+					} else if(password.equals("")){
+						return Utiles.retornarSalida(true, "Se necesita una contrase\u00f1a para el Administrador.");
+					} else if(passConfirm.equals("") || !passConfirm.equals(password)){
+						return Utiles.retornarSalida(true, "Las contrase\u00f1as no coinciden.");
+					} else {
+						try{
+							AdminEntity entity = new AdminEntity();
+							entity.setAdminName(admin);
+							entity.setNombre(name);
+							entity.setApellido(lastname);
+							entity.setPassword(password);
+							entity.setCi(ci);
+							entity.setDireccion(address);
+							entity.setTelefono(phone);
+							entity.setEmail(email);
+							
+							administradorDao.guardar(entity);
+							return Utiles.retornarSalida(false, "Administrador guardado.");						
+						} catch(Exception e){
+							e.printStackTrace();
+							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del Administrador.");
+						}
+					}
+				}
+			}
+		}
 	
 }

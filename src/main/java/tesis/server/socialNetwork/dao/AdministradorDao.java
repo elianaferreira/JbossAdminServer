@@ -1,6 +1,7 @@
 package tesis.server.socialNetwork.dao;
 
 
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.LocalBean;
@@ -8,11 +9,14 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 
+import org.hibernate.Query;
 import org.json.JSONException;
 import org.json.JSONObject;
 //import org.springframework.stereotype.Controller;
 
 //import com.sun.xml.ws.api.tx.at.Transactional;
+
+
 
 
 import tesis.server.socialNetwork.entity.AdminAccessTokenEntity;
@@ -30,6 +34,14 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 	@Inject
 	AdminAccessTokenDao adminAccessTokenDao;
 	
+	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void guardar(AdminEntity entity){
+		entity.setFechaIns(new Date());
+		entity.setLogged(false);
+		this.save(entity);
+		
+	}
 
 	
 	public AdminEntity verificarAdministrador(String adminName, String accessToken){
@@ -102,7 +114,7 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 			AdminEntity admin = lista.get(0);
 			if(!admin.getPassword().equals(password)){
 				retorno = new JSONObject();
-				retorno.put("error", "La contrasena no coincide.");
+				retorno.put("error", "La contrase\u00f1a no coincide.");
 				return retorno;
 			} else {
 				//cambiamos el estado del atributo logged a TRUE
@@ -113,7 +125,7 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 					String accessToken = adminAccessTokenDao.guardar(adminName);
 					if(accessToken == null){
 						retorno = new JSONObject();
-						retorno.put("error", "Ha ocurrido un error al iniciar sesion.");
+						retorno.put("error", "Ha ocurrido un error al iniciar sesi\u00f3n.");
 						return retorno;
 					} else {
 						this.update(admin);
@@ -124,7 +136,7 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 				} catch (Exception ex){
 					ex.printStackTrace();
 					retorno = new JSONObject();
-					retorno.put("error", "Ha ocurrido un error al iniciar sesion.");
+					retorno.put("error", "Ha ocurrido un error al iniciar sesi\u00f3n.");
 					return retorno;
 				}
 			}
@@ -166,5 +178,45 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 		//retorno.put("password", admin.getPassword());
 		
 		return retorno;	
+	}
+	
+	
+	
+	/**
+	 * Metodo que verifica si un nombre de administrador ya existe
+	 * 
+	 * @param adminName
+	 * @return
+	 */
+	public Boolean yaExisteAdministrador(String adminName){
+		String consulta = "from AdminEntity a where a.adminName = :adminName";
+		Query query = this.getSession().createQuery(consulta);
+		query.setParameter("adminName", adminName);
+		AdminEntity entity = (AdminEntity) query.uniqueResult();
+		if(entity == null){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	
+	/**
+	 * Metodo que retorna todos los datos del administrador que pueden ser modificados
+	 * 
+	 * @param admin
+	 * @return
+	 */
+	public JSONObject getAllDataForEdit(AdminEntity admin){
+		JSONObject retorno = new JSONObject();
+		retorno.put("admin", admin.getAdminName());
+		retorno.put("name", admin.getNombre());
+		retorno.put("lastname", admin.getApellido());
+		retorno.put("password", admin.getPassword());
+		retorno.put("ci", admin.getCi());
+		retorno.put("phone", admin.getTelefono());
+		retorno.put("email", admin.getEmail());
+		retorno.put("address", admin.getDireccion());
+		return retorno;
 	}
 }
