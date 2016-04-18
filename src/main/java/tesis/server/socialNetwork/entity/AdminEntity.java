@@ -34,6 +34,7 @@ public class AdminEntity {
 	private String email;
 	private Date fechaIns;
 	private boolean logged;
+	private Boolean eliminado;
 	
 	//getters y setters
 	@Id
@@ -126,5 +127,13 @@ public class AdminEntity {
 	}
 	public void setLogged(boolean logged) {
 		this.logged = logged;
+	}
+	
+	@Column(name="ELIMINADO", nullable=false, columnDefinition="boolean default false")
+	public Boolean getEliminado() {
+		return eliminado;
+	}
+	public void setEliminado(Boolean eliminado) {
+		this.eliminado = eliminado;
 	}
 }

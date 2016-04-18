@@ -1249,35 +1249,42 @@ public class AdministradorWS {
 		
 		
 		@POST
-		@Path("/newAdmin")
-		@Produces("text/html; charset=UTF-8")
+		@Path("/new")
+		@Consumes("application/x-www-form-urlencoded")
 		@ResponseBody
 		public String addNewAdmin(@FormParam("admin") String admin,
+								  @FormParam("accessToken") String accessToken,
+								  @FormParam("adminName") String adminName,
 								  @FormParam("name") String name,
 								  @FormParam("lastname") String lastname,
 								  @FormParam("password") String password,
-								  @FormParam("passConfirm") String passConfirm,
 								  @FormParam("email") String email,
 								  @FormParam("ci") Integer ci,
 								  @FormParam("phone") String phone,
 								  @FormParam("address") String address){
 			
-			if(admin.equals("")){
+			
+			AdminEntity adminEntity = administradorDao.verificarAdministrador(admin, accessToken);
+			if(adminEntity == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			}
+			
+			if(adminName == null || adminName.equals("")){
 				return Utiles.retornarSalida(true, "El Administrador debe tener un nombre de identificaci\u00f3n.");
 			} else {
-				if(administradorDao.yaExisteAdministrador(admin)){
+				if(administradorDao.yaExisteAdministrador(adminName)){
 					return Utiles.retornarSalida(true, "Ya existe un Administrador con ese nombre de usuario.");
 				} else {
-					if(name.equals("") || lastname.equals("")){
+					if(name == null || name.equals("") ||  lastname == null || lastname.equals("")){
 						return Utiles.retornarSalida(true, "El Administrador debe contar con nombre y apellido.");
-					} else if(password.equals("")){
+					} else if(password == null || password.equals("")){
 						return Utiles.retornarSalida(true, "Se necesita una contrase\u00f1a para el Administrador.");
-					} else if(passConfirm.equals("") || !passConfirm.equals(password)){
-						return Utiles.retornarSalida(true, "Las contrase\u00f1as no coinciden.");
+					} else if(ci == null){
+						return Utiles.retornarSalida(true, "La C\u00e9dula de Identidad no puede estar vac\u00eda.");
 					} else {
 						try{
 							AdminEntity entity = new AdminEntity();
-							entity.setAdminName(admin);
+							entity.setAdminName(adminName.toLowerCase());
 							entity.setNombre(name);
 							entity.setApellido(lastname);
 							entity.setPassword(password);
@@ -1293,6 +1300,220 @@ public class AdministradorWS {
 							return Utiles.retornarSalida(true, "Ha ocurrido un error al guardar los datos del Administrador.");
 						}
 					}
+				}
+			}
+		}
+		
+		
+		@POST
+		@Path("/update/{admin}")
+		@Consumes("application/x-www-form-urlencoded")
+		@ResponseBody
+		public String updateAdminInfo(@PathParam("admin") String adminName,
+								  @FormParam("newAdmin") String newAdminName,
+								  @FormParam("accessToken") String accessToken,
+								  @FormParam("name") String name,
+								  @FormParam("lastname") String lastname,
+								  @FormParam("password") String password,
+								  @FormParam("passConfirm") String passConfirm,
+								  @FormParam("email") String email,
+								  @FormParam("ci") Integer ci,
+								  @FormParam("phone") String phone,
+								  @FormParam("address") String address){
+			
+			AdminEntity admin = administradorDao.verificarAdministrador(adminName.toLowerCase(), accessToken);
+			if(admin == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			} else {
+				try{
+					//verificacamos si es que cambio su username y si no es repetido
+					if(newAdminName != null && newAdminName.equals("")){
+						AdminEntity adminExistente = administradorDao.yaExisteAministrador(newAdminName);
+						if(adminExistente != null){
+							//verifico si no soy yo mismo
+							if(!adminExistente.getIdAdministrador().equals(admin.getIdAdministrador())){
+								return Utiles.retornarSalida(true, "Ya existe un Administrador con ese nombre de usuario.");
+							}
+						} else {
+							admin.setAdminName(newAdminName);
+						}
+					}
+						
+					if(name != null && !name.equals("")){
+						admin.setNombre(name);
+					}
+					if(lastname != null && !lastname.equals("")){
+						admin.setApellido(lastname);
+					}
+					
+					/*if(password != null && !password.equals("") && passConfirm != null && passConfirm.equals(password)){
+						admin.setPassword(password);
+					} else if((password != null && passConfirm == null) || !passConfirm.equals(password)){
+						return Utiles.retornarSalida(true, "Las contrasenhas deben coincidir");
+					}*/
+					if(password != null && !password.equals("")){
+						if(passConfirm == null || passConfirm.equals("")){
+							return Utiles.retornarSalida(true, "Las contrase\u00f1as deben coincidir");
+						} else {
+							if(!password.equals(passConfirm)){
+								return Utiles.retornarSalida(true, "Las contrase\u00f1as deben coincidir");
+							} else {
+								admin.setPassword(password);
+							}
+						}
+					}
+					
+					if(email != null && !email.equals("")){
+						admin.setEmail(email);
+					}
+					
+					if(ci != null && !ci.equals("")){
+						admin.setCi(ci);
+					}
+						
+					if(phone != null && !phone.equals("")){
+						admin.setTelefono(phone);
+					}
+					
+					if(address != null && !address.equals("")){
+						admin.setDireccion(address);
+					}
+					
+					administradorDao.modificar(admin);
+					return Utiles.retornarSalida(false, "Datos actualizados.");
+				
+				} catch(Exception e){
+					e.printStackTrace();
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al actualizar los datos.");
+				}
+			}
+		}
+		
+		
+		
+		@POST
+		@Path("/delete/{adminToDelete}")
+		@Consumes("application/x-www-form-urlencoded")
+		@ResponseBody
+		public String deleteAdmin(@PathParam("adminToDelete") String adminToDelete,
+								  @FormParam("admin") String adminName,
+								  @FormParam("accessToken") String accessToken){
+			
+			AdminEntity admin = administradorDao.verificarAdministrador(adminName.toLowerCase(), accessToken);
+			if(admin == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			} else {
+				try{
+					//buscamos el administrador a ser eliminado
+					AdminEntity adminBaja = administradorDao.yaExisteAministrador(adminToDelete.toLowerCase());
+					if(adminBaja == null){
+						return Utiles.retornarSalida(true, "El administrador a ser dado de baja no existe.");
+					}
+					
+					adminBaja.setEliminado(true);
+					administradorDao.modificar(adminBaja);
+					System.out.println("El administrador " + adminToDelete + " ha sido dado de baja por " + adminName + ".");
+					return Utiles.retornarSalida(false, "El administrador ha sido dado de baja.");
+					
+				} catch(Exception e){
+					e.printStackTrace();
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al dar de baja al administrador.");
+				}
+			}
+		}
+		
+		
+		
+		@GET
+		@Path("/getAllActivedAdmin")
+		@Produces("text/html; charset=UTF-8")
+		@ResponseBody
+		public String getAllActivedAdmins(@QueryParam("admin") String adminName,
+											@QueryParam("accessToken") String accessToken){
+			
+			AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
+			if(admin == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			} else {
+				try {
+					List<AdminEntity> listaActivos = administradorDao.getListaActivos();
+					//de esta lista excluimos al que solicito
+					JSONArray retorno = new JSONArray();
+					//siempre va a haber al menos un administrador activo, SIEMPRE
+					for(int k=0; k<listaActivos.size(); k++){
+						if(!listaActivos.get(k).getAdminName().equals(adminName)){
+							JSONObject obj = administradorDao.getJsonFromAdmin(listaActivos.get(k));
+							retorno.put(obj);
+						}
+					}
+					return Utiles.retornarSalida(false, retorno.toString());
+				} catch(Exception e){
+					e.printStackTrace();
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al retornar la lista de administradores activos.");
+				}
+			}
+		}
+		
+		
+		
+		@GET
+		@Path("/getAllInactivedAdmin")
+		@Produces("text/html; charset=UTF-8")
+		@ResponseBody
+		public String getAllInactivedAdmins(@QueryParam("admin") String adminName,
+											@QueryParam("accessToken") String accessToken){
+			
+			AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
+			if(admin == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			} else {
+				try {
+					List<AdminEntity> listaActivos = administradorDao.getListaInactivos();
+					//de esta lista excluimos al que solicito
+					JSONArray retorno = new JSONArray();
+					for(int k=0; k<listaActivos.size(); k++){
+						if(!listaActivos.get(k).getAdminName().equals(adminName)){
+							JSONObject obj = administradorDao.getJsonFromAdmin(listaActivos.get(k));
+							retorno.put(obj);
+						}
+					}
+					return Utiles.retornarSalida(false, retorno.toString());
+				} catch(Exception e){
+					e.printStackTrace();
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al retornar la lista de administradores inactivos.");
+				}
+			}
+		}
+		
+		
+		
+		@POST
+		@Path("/enable/{adminToEnable}")
+		@Consumes("application/x-www-form-urlencoded")
+		@ResponseBody
+		public String enableAdmin(@PathParam("adminToEnable") String adminToEnable,
+								  @FormParam("admin") String adminName,
+								  @FormParam("accessToken") String accessToken){
+			
+			AdminEntity admin = administradorDao.verificarAdministrador(adminName.toLowerCase(), accessToken);
+			if(admin == null){
+				return Utiles.retornarSalida(true, "El nombre o la contrase\u00f1a son inv\u00e1lidos.");
+			} else {
+				try{
+					//buscamos el administrador a ser dado de alta
+					AdminEntity adminBaja = administradorDao.yaExisteAministrador(adminToEnable.toLowerCase());
+					if(adminBaja == null){
+						return Utiles.retornarSalida(true, "El administrador a ser dado de alta no existe.");
+					}
+					
+					adminBaja.setEliminado(false);
+					administradorDao.modificar(adminBaja);
+					System.out.println("El administrador " + adminToEnable + " ha sido dado de alta por " + adminName + ".");
+					return Utiles.retornarSalida(false, "El administrador ha sido dado de alta.");
+					
+				} catch(Exception e){
+					e.printStackTrace();
+					return Utiles.retornarSalida(true, "Ha ocurrido un error al dar de alta al administrador.");
 				}
 			}
 		}
