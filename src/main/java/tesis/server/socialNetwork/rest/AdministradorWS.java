@@ -466,7 +466,7 @@ public class AdministradorWS {
 				
 				List<ContactoEntity> listaTotalContactos = contactoDao.listarTodosLosContactos();
 				if(listaTotalContactos.size() == 0){
-					return Utiles.retornarSalida(true, "A\u00fan no hay ninguna relaci�n de amistad formada dentro de la red.");
+					return Utiles.retornarSalida(true, "A\u00fan no hay ninguna relaci\u00f3n de amistad formada dentro de la red.");
 				} else {
 					JSONArray arrayEdges = new JSONArray();
 					for(ContactoEntity c: listaTotalContactos){
