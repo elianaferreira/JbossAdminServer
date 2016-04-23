@@ -1517,5 +1517,20 @@ public class AdministradorWS {
 				}
 			}
 		}
+		
+		
+		@POST
+		@Path("/deleteAllData")
+		@Consumes("application/x-www-form-urlencoded")
+		@ResponseBody
+		public String deleteAllData(){
+			try{
+				administradorDao.deleteAllTables();
+				return Utiles.retornarSalida(false, "Todos los datos eliminados satisfactoriamente.");			
+			} catch(Exception e){
+				e.printStackTrace();
+				return Utiles.retornarSalida(true, "Ha ocurrido un error al limpiar la Base de Datos.");
+			}
+		}
 	
 }

@@ -266,4 +266,60 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 		List lista = query.list();
 		return lista;
 	}
+	
+	/**
+	 * Eliminamos todos los datos de las tablas dentro de una unica transaccion
+	 */
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void deleteAllTables(){
+		//FAVs
+		String deleteFavs = "delete from FavoritoEntity f";
+		Query query = this.getSession().createQuery(deleteFavs);
+		query.executeUpdate();
+		
+		//NOFAVs
+		String deleteNoFavs = "delete from NoFavoritoEntity nf";
+		query = this.getSession().createQuery(deleteNoFavs);
+		query.executeUpdate();
+		
+		//comentarios
+		String comentarios = "delete from ComentarioEntity c";
+		query = this.getSession().createQuery(comentarios);
+		query.executeUpdate();
+		
+		//notificaciones
+		String notificaciones = "delete from NotificacionEntity n";
+		query = this.getSession().createQuery(notificaciones);
+		query.executeUpdate();
+		
+		//solicitudes de amistad
+		String solicitudes = "delete from SolicitudAmistadEntity s";
+		query = this.getSession().createQuery(solicitudes);
+		query.executeUpdate();
+		
+		String contactos = "delete from ContactoEntity co";
+		query = this.getSession().createQuery(contactos);
+		query.executeUpdate();
+				
+		//repost
+		String reposts = "delete from RepostEntity re";
+		query = this.getSession().createQuery(reposts);
+		query.executeUpdate();
+				
+		String posts = "delete from PostEntity p";
+		query = this.getSession().createQuery(posts);
+		query.executeUpdate();
+				
+		//voluntarios
+		String voluntarios = "delete from VoluntarioEntity v";
+		query = this.getSession().createQuery(voluntarios);
+		query.executeUpdate();
+		
+		
+		String campanhas = "delete from CampanhaEntity ca";
+		query = this.getSession().createQuery(campanhas);
+		query.executeUpdate();
+		
+		
+	}
 }

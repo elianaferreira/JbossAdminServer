@@ -395,7 +395,7 @@ public class VoluntarioWS {
 		//traemos el usuario de la BD y cambiamos el campo logged
 		VoluntarioEntity voluntario = voluntarioDao.verificarUsuario(username, password);
 		if(voluntario == null){
-			return Utiles.retornarSalida(true, "El usuario o el contrase\u00f1a no es v\u00e1lido.");
+			return Utiles.retornarSalida(true, "El usuario o la contrase\u00f1a no es v\u00e1lido.");
 		}else{
 			try{
 				voluntario.setLogged(false);
