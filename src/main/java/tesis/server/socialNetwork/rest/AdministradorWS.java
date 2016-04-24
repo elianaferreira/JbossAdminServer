@@ -105,9 +105,9 @@ public class AdministradorWS {
 		} else {
 			//iniciamos sesion para el administrador
 			if(administradorDao.cerrarSesionAdmin(administrador)){
-				return Utiles.retornarSalida(false, "Sesion cerrada.");
+				return Utiles.retornarSalida(false, "Sesi\u00f3n cerrada.");
 			} else {
-				return Utiles.retornarSalida(true, "Error al cerrar la sesion");
+				return Utiles.retornarSalida(true, "Error al cerrar la sesi\u00f3n");
 			}
 		}
 	}
@@ -1327,7 +1327,7 @@ public class AdministradorWS {
 			} else {
 				try{
 					//verificacamos si es que cambio su username y si no es repetido
-					if(newAdminName != null && newAdminName.equals("")){
+					if(newAdminName != null && !newAdminName.equals("")){
 						AdminEntity adminExistente = administradorDao.yaExisteAministrador(newAdminName);
 						if(adminExistente != null){
 							//verifico si no soy yo mismo
@@ -1380,7 +1380,8 @@ public class AdministradorWS {
 					}
 					
 					administradorDao.modificar(admin);
-					return Utiles.retornarSalida(false, "Datos actualizados.");
+					JSONObject retorno = administradorDao.getJsonFromAdmin(admin);
+					return Utiles.retornarSalida(false, retorno.toString());
 				
 				} catch(Exception e){
 					e.printStackTrace();

@@ -117,7 +117,7 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 			AdminEntity admin = lista.get(0);
 			if(!admin.getPassword().equals(password)){
 				retorno = new JSONObject();
-				retorno.put("error", "La contrasena no coincide.");
+				retorno.put("error", "La contrase\u00f1a no coincide.");
 				return retorno;
 			} else {
 				if(admin.getEliminado()){
@@ -133,7 +133,7 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 					String accessToken = adminAccessTokenDao.guardar(adminName);
 					if(accessToken == null){
 						retorno = new JSONObject();
-						retorno.put("error", "Ha ocurrido un error al iniciar sesion.");
+						retorno.put("error", "Ha ocurrido un error al iniciar sesi\u00f3n.");
 						return retorno;
 					} else {
 						this.update(admin);
@@ -144,7 +144,7 @@ public class AdministradorDao extends GenericDao<AdminEntity, Integer> {
 				} catch (Exception ex){
 					ex.printStackTrace();
 					retorno = new JSONObject();
-					retorno.put("error", "Ha ocurrido un error al iniciar sesion.");
+					retorno.put("error", "Ha ocurrido un error al iniciar sesi\u00f3n.");
 					return retorno;
 				}
 			}
