@@ -372,10 +372,10 @@ public class AdministradorWS {
 	
 	
 	@POST
-	@Path("/inniguateUser")
+	@Path("/invalidateUser")
 	@Consumes("application/x-www-form-urlencoded")
 	@ResponseBody
-	public String desactivarCuentaVoluntario(@FormParam("adminName") String adminName,
+	public String desactivarCuentaVoluntario(@FormParam("admin") String adminName,
 												@FormParam("accessToken") String accessToken,
 												@FormParam("username") String username){
 		
@@ -405,7 +405,7 @@ public class AdministradorWS {
 	@Path("/activateUser")
 	@Consumes("application/x-www-form-urlencoded")
 	@ResponseBody
-	public String activarCuentaUsuario(@FormParam("adminName") String adminName,
+	public String activarCuentaUsuario(@FormParam("admin") String adminName,
 										@FormParam("accessToken") String accessToken,
 										@FormParam("username") String username){
 		
@@ -440,7 +440,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/allNodeContacts")
 	@ResponseBody
-	public String getAllNodeContacts(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getAllNodeContacts(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONObject retorno = new JSONObject();
@@ -492,7 +492,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/subtotalesReportes")
 	@ResponseBody
-	public String getSubtotalesReportes(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getSubtotalesReportes(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONObject retorno = new JSONObject();
@@ -513,7 +513,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/reportesRelevantes")
 	@ResponseBody
-	public String getReportesRelevantes(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getReportesRelevantes(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
@@ -532,7 +532,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/usuariosPorMes")
 	@ResponseBody
-	public String getCantUsuariosPorMes(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getCantUsuariosPorMes(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONObject retorno = new JSONObject();
 		if(admin == null){
@@ -563,7 +563,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/usersByRanking")
 	@ResponseBody
-	public String getUsersByRanking(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getUsersByRanking(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
@@ -583,7 +583,7 @@ public class AdministradorWS {
 	@Path("/campanha")
 	@Consumes("application/x-www-form-urlencoded")
 	@ResponseBody
-	public String iniciarCampanha(@FormParam("adminName") String adminName,
+	public String iniciarCampanha(@FormParam("admin") String adminName,
 									@FormParam("accessToken") String accessToken,
 									@FormParam("nombre") String nombreCampanha,
 									@FormParam("mensaje") String mensajeCampanha,
@@ -671,7 +671,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/usersByCatA")
 	@ResponseBody
-	public String getUsersCatA(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getUsersCatA(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
@@ -689,7 +689,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/usersByCatB")
 	@ResponseBody
-	public String getUsersCatB(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getUsersCatB(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
@@ -707,7 +707,7 @@ public class AdministradorWS {
 	@GET
 	@Path("/allContacts")
 	@ResponseBody
-	public String getAllContacts(@QueryParam("adminName") String adminName, @QueryParam("accessToken") String accessToken){
+	public String getAllContacts(@QueryParam("admin") String adminName, @QueryParam("accessToken") String accessToken){
 		AdminEntity admin = administradorDao.verificarAdministrador(adminName, accessToken);
 		JSONArray retorno = new JSONArray();
 		if(admin == null){
@@ -727,7 +727,7 @@ public class AdministradorWS {
 	@Path("/alert")
 	@Consumes("application/x-www-form-urlencoded")
 	@ResponseBody
-	public String lanzarAlertaAVoluntario(@FormParam("adminName") String adminName, 
+	public String lanzarAlertaAVoluntario(@FormParam("admin") String adminName, 
 											@FormParam("accessToken") String accessToken,
 											@FormParam("username") String username,
 											@FormParam("mensaje") String mensajeAlerta){
