@@ -1205,12 +1205,39 @@ public class VoluntarioWS {
 				} catch(Exception e){
 					e.printStackTrace();
 					if(notificacion.getTipoNotificacion().equals(Utiles.NOTIF_INVITADO_CAMPANHA)){
-						return Utiles.retornarSalida(true, "Ha ocurrido un error al unirte a la campa\u00f1 a.");
+						return Utiles.retornarSalida(true, "Ha ocurrido un error al unirte a la campa\u00f1a.");
 					} else {
 						return Utiles.retornarSalida(true, "Ha ocurrido un error al aceptar la solicitud de amistad.");
 					}
 				}
 			}
 		}
-	}	
+	}
+	
+	
+	@POST
+	@Path("/user/recoverPassword")
+	@Consumes("application/x-www-form-urlencoded")
+	@Produces("text/html; charset=UTF-8")
+	@ResponseBody
+	public String setearPasswordPorDefault(@FormParam("username") String username,
+											@FormParam("email") String email){
+		try{
+			VoluntarioEntity voluntario = voluntarioDao.findByClassAndID(VoluntarioEntity.class, username.toLowerCase());
+			if(voluntario == null){
+				return Utiles.retornarSalida(true, "El usuario no existe.");
+			} else {
+				String newPass = Utiles.getMD5("123456");
+				voluntario.setPassword(newPass);
+				voluntarioDao.modificar(voluntario);
+				return Utiles.retornarSalida(false, "123456");				
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+			return Utiles.retornarSalida(true, "Ha ocurrido un error al cambiar la contrase\u00f1a");
+		}
+	}
+	
+	
+	
 }
