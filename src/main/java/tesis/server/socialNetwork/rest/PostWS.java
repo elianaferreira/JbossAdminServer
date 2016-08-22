@@ -172,6 +172,8 @@ public class PostWS {
 						}
 					}
 					postDao.guardar(reporte);
+					//voluntarioDao.updateReputation(voluntarioQueResuelve, false, true, false,false, false, false, false);
+					voluntarioDao.updateReputation(voluntarioEntity, true, dataJson.getBoolean("solucionado"), false, false, false, false, false);
 					return Utiles.retornarSalida(false, "Guardada.");
 				}
 			}
