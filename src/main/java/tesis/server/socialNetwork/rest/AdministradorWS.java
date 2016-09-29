@@ -472,8 +472,8 @@ public class AdministradorWS {
 					for(ContactoEntity c: listaTotalContactos){
 						JSONObject cTemp = new JSONObject();
 						cTemp.put("id", String.valueOf(c.getIdAmistad()));
-						cTemp.put("source", c.getContacto().getUserName());
-						cTemp.put("target", c.getVoluntario().getUserName());
+						cTemp.put("source", c.getVoluntario().getUserName());
+						cTemp.put("target", c.getContacto().getUserName());
 						cTemp.put("type", "arrow");
 						cTemp.put("size", 1);
 						arrayEdges.put(cTemp);
